@@ -1,0 +1,170 @@
+image: node:18
+
+variables:
+  NODE_VERSION: "18"
+  NPM_CONFIG_CACHE: "$CI_PROJECT_DIR/.npm"
+  NPM_CONFIG_PRODUCTION: "false"
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+    - .npm/
+
+stages:
+  - lint
+  - test
+  - build
+  - deploy
+
+# Lint stage
+lint:
+  stage: lint
+  script:
+    - echo "🔍 Linting code..."
+    - npm ci
+    - npm run lint
+  only:
+    - merge_requests
+    - main
+    - tags
+  allow_failure: false
+
+# Test stage
+test:
+  stage: test
+  script:
+    - echo "🧪 Running tests..."
+    - npm ci
+    - npm test
+  coverage: '/Lines\s*:\s*(\d+\.\d+)%/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+    paths:
+      - coverage/
+    expire_in: 1 week
+  only:
+    - merge_requests
+    - main
+    - tags
+  allow_failure: false
+
+# Build stage
+build:
+  stage: build
+  script:
+    - echo "🔨 Building package..."
+    - npm ci
+    - npm run build
+    - echo "✅ Build complete!"
+    - ls -lah dist/
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week
+  only:
+    - merge_requests
+    - main
+    - tags
+  allow_failure: false
+
+# Deploy to npm (triggers jsDelivr automatically)
+deploy:npm:
+  stage: deploy
+  image: node:18
+  before_script:
+    - echo "📦 Preparing npm publish..."
+    - npm ci
+    - npm run build
+  script:
+    - echo "🚀 Publishing to npm..."
+    - |
+      if [ -z "$NPM_TOKEN" ]; then
+        echo "❌ NPM_TOKEN not set. Skipping npm publish."
+        exit 1
+      fi
+    - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+    - npm whoami
+    - npm publish --access public
+    - echo "✅ Published to npm!"
+    - echo ""
+    - echo "📦 Package available on jsDelivr:"
+    - echo "   https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${CI_COMMIT_TAG:-latest}/dist/logcad.min.js"
+    - echo "   https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${CI_COMMIT_TAG:-latest}/dist/logcad.esm.js"
+  only:
+    - tags
+  except:
+    - /^v?\d+\.\d+\.\d+.*$/  # Only publish semantic version tags
+  when: manual
+  environment:
+    name: npm
+    url: https://www.npmjs.com/package/${CI_PROJECT_NAME}
+
+# Auto-deploy on version tags (v1.0.0, 1.0.0, etc.)
+deploy:npm:auto:
+  stage: deploy
+  image: node:18
+  before_script:
+    - echo "📦 Preparing npm publish..."
+    - npm ci
+    - npm run build
+  script:
+    - echo "🚀 Auto-publishing to npm..."
+    - |
+      if [ -z "$NPM_TOKEN" ]; then
+        echo "❌ NPM_TOKEN not set. Skipping npm publish."
+        exit 1
+      fi
+    - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+    - npm whoami
+    - npm publish --access public
+    - echo "✅ Published to npm!"
+    - echo ""
+    - echo "📦 Package available on jsDelivr:"
+    - echo "   https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${CI_COMMIT_TAG}/dist/logcad.min.js"
+    - echo "   https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${CI_COMMIT_TAG}/dist/logcad.esm.js"
+  only:
+    - /^v?\d+\.\d+\.\d+$/  # Matches v1.0.0 or 1.0.0 format
+  when: on_success
+  environment:
+    name: npm
+    url: https://www.npmjs.com/package/${CI_PROJECT_NAME}
+
+# Create GitLab release
+release:
+  stage: deploy
+  image: node:18
+  script:
+    - echo "🏷️ Creating GitLab release..."
+  release:
+    name: 'Release $CI_COMMIT_TAG'
+    tag_name: '$CI_COMMIT_TAG'
+    description: |
+      Automated release for $CI_COMMIT_TAG
+
+      ## 📦 npm Package
+      - [npm package](https://www.npmjs.com/package/${CI_PROJECT_NAME}/v${CI_COMMIT_TAG#v})
+
+      ## 🌐 jsDelivr CDN
+      - UMD: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${CI_COMMIT_TAG}/dist/logcad.min.js`
+      - ESM: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${CI_COMMIT_TAG}/dist/logcad.esm.js`
+
+      ## 📋 Usage
+      ```html
+      <!-- UMD (Browser) -->
+      <script src="https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${CI_COMMIT_TAG}/dist/logcad.min.js"></script>
+      ```
+
+      ```javascript
+      // ESM (Module)
+      import logcad from 'https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${CI_COMMIT_TAG}/dist/logcad.esm.js';
+      ```
+  only:
+    - tags
+  when: on_success
+  dependencies:
+    - build
+
