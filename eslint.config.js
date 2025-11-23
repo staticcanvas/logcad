@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import globals from 'globals';
 
 export default [
     js.configs.recommended,
@@ -23,7 +24,9 @@ export default [
                 Map: 'readonly',
                 Set: 'readonly',
                 JSON: 'readonly',
-                Math: 'readonly'
+                Math: 'readonly',
+                ...globals.browser, // allows browser globals
+                ...globals.node     // allows node globals
             },
             parserOptions: {
                 ecmaVersion: 2022,
