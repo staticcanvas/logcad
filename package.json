@@ -1,6 +1,6 @@
 {
     "name": "@staticcanvas/logcad",
-    "version": "0.2.1",
+    "version": "0.3.0",
     "description": "Utility to log styled messages to the console.",
     "main": "dist/logcad.js",
     "module": "dist/logcad.esm.js",
