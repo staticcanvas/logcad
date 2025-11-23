@@ -2,8 +2,7 @@
 
 A lightweight utility for styled console logging and simple debug message capture.
 
-![MIT](https://img.shields.io/badge/MIT-License-0000af?style=flat&labelColor=000080)
-
+[![gitlab](https://img.shields.io/gitlab/license/staticcanvas/logcad?style=flat&logo=gitlab&labelColor=00ffff&color=0000af&logoColor=ffffff)](https://gitlab.com/staticcanvas) [![gitlab](https://img.shields.io/gitlab/pipeline-status/staticcanvas/logcad?style=flat&logo=gitlab&labelColor=00ffff&color=0000af)](https://gitlab.com/staticcanvas) [![npm](https://img.shields.io/npm/v/logcad?style=flat&logo=npm&labelColor=00ffff&color=0000af)](https://www.npmjs.com/package/logcad) [![jsdelivr](https://img.shields.io/jsdelivr/npm/hm/logcad?style=flat&logo=jsdelivr&labelColor=00ffff&color=0000af)](https://cdn.jsdelivr.net/package/npm/logcad)
 ## **Overview**
 - **Purpose**: Logs CSS-styled messages to the browser console and captures short debug entries to `localStorage` for lightweight client-side debugging.
 - **Key exports**: `logc` (styled console output), `logd` (debug logger that records to `localStorage`).
