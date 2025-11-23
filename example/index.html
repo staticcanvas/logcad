@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- <script type="module">
+        import { logd } from './dist/logcad.esm.js';
+        logd({ name: 'logd' }, 'action', 'message');
+    </script>-->
+    <script src="../dist/logcad.min.js"></script>
+    <script>
+        // Test logc 
+        logc([
+            { text: 'Hello world', c: 'white', bg: 'blue', b: true }
+        ]);
+        // with formatting
+        logc([
+            { text: 'Hello world', c: 'white', bg: 'blue', b: true, i: true, u: true },
+            { text: 'Hello world', c: 'white', bg: 'green', b: true },
+            { text: 'Hello world', c: 'black', bg: 'cyan', b: true },
+            { text: 'Hello world', c: 'white', bg: 'blue', b: true },
+        ]);
+        // Test Logging default
+        logd({ name: 'logd' }, 'update', 'update message');
+        // test logging in color
+        logd({ name: 'logd', color: 'red', bg: '#000' }, 'update', 'update message in color');
+        // test logging in color with custom logname and args output
+        logd(
+            { name: 'logd', color: 'red', bg: '#000', logname: '🐼', logcolor: 'white' }, 
+            'update', 
+            'update message in color with custom logname and args output', 
+            {name:'file', value: '5213', config_enabled: true}
+        );
+        // test logging in color with custom logname and args output, with trace
+        logd(
+            { name: 'logd', color: 'red', bg: '#000', logname: '🐼', logcolor: 'white' },
+            'update',
+            'update message in color with custom logname and args output',
+            { name: 'file', value: '5213', config_enabled: true },
+            true
+        );
+        
+    </script>
+</head>
+<body>
+    
+</body>
+</html>
