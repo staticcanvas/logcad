@@ -1,36 +1,9 @@
 /**
- * @file logcad.js
- * @description Utility to log styled messages to the console.
- * @author StaticCanvas | sgkens
- * @version 0.2.0
- * @license MIT
- * @see {@link https://github.com/staticcanvas/foxinsearch}
- */
-
-(function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-        typeof define === 'function' && define.amd ? define(factory) :
-            (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.Foxin = factory());
-})(this, (function () {
-    'use strict';
-
-    function getDefaultExportFromCjs(x) {
-        return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
-    }
-
-/**
- * Logs css styled messages to the console.
- * 
- * @description
-
- * This function logs styled messages to the console. It takes an array of objects, where each object specifies the text and optional style properties to apply.
- * 
+ * @description This function logs styled messages to the console. It takes an array of objects, where each object specifies the text and optional style properties to apply.
  * @param {Array<Object>} objectArray - Array of objects defining the text and style properties for each message.
  * @returns {void}
-
- * 
+ * -------------
  * @Properties
-
  * @param {Array<Object>} objectArray[].text - description
  * @param {string} objectArray[].text - The text to be logged.
  * @param {string} [objectArray[].c="#000"] - The color of the text. Default is black.
@@ -50,17 +23,17 @@
  */
 
 function logc(objectArray) {
-    let strings = [];
-    let styles = [];
+    const strings = [];
+    const styles = [];
 
     objectArray.forEach((object) => {
         // Build the CSS styles for the current object
-        let cssStyles = "";
+        let cssStyles = '';
 
         if (object.c) {
             cssStyles += `color: ${object.c};`;
         } else {
-            cssStyles += "color: #000;"; // Default color
+            cssStyles += 'color: #000;'; // Default color
         }
 
         if (object.bg) {
@@ -68,15 +41,15 @@ function logc(objectArray) {
         }
 
         if (object.b) {
-            cssStyles += "font-weight: bold;";
+            cssStyles += 'font-weight: bold;';
         }
 
         if (object.i) {
-            cssStyles += "font-style: italic;";
+            cssStyles += 'font-style: italic;';
         }
 
         if (object.u) {
-            cssStyles += "text-decoration: underline;";
+            cssStyles += 'text-decoration: underline;';
         }
 
         if (object.border) {
@@ -89,28 +62,31 @@ function logc(objectArray) {
     });
 
     // Use Function.prototype.apply to spread the arrays for console.log
-    console.log(strings.join(""), ...styles);
+    console.log(strings.join(''), ...styles);
 }
 
 
 /**
- * Logs css styled debug messages to the console.
- * 
- * @description
- * This function uses the `logc` function to logs styled debug messages to the console. 
- * 
- * @param {object} name - name of the logger and styling
- * @param {string} action - The action being performed.
- * @param {string} message - The message to be logged.
- * @param {any} args - The arguments to be logged.
- * @param {object} config - The configuration object.
- * @param {boolean} [trace=false] - Whether to include the stack trace.
- * @returns {void}
- * 
- * @example
- *  logd({ name: 'logd' }, action, message, args, trace = false);
- *  logd({ name: 'logd', color: '#fff', bg: '#7A5ACF', logname: '🐼', logcolor: white }, action, message, args, trace = false);
- */
+* @description This function uses the `logc` function to logs styled debug messages to the console.
+* @param {object} name - name of the logger and styling
+* @param {string} action - The action being performed.
+* @param {string} message - The message to be logged.
+* @param {any} args - The arguments to be logged.
+* @param {object} config - The configuration object.
+* @param {boolean} [trace=false] - Whether to include the stack trace.
+* @returns {void}
+*
+* @example
+*  // log message with default styling and meta
+*  logd(
+*      { name: 'logd' },
+*      'action',
+*      'message',
+*      {args},
+*      trace = false
+*  );
+*  logd({ name: 'logd', color: '#fff', bg: '#7A5ACF', logname: '🐼', logcolor: white }, action, message, args, trace = false);
+*/
 
 function logd(name, action, message, args, trace = false) {
     if (args === null) {
@@ -119,7 +95,25 @@ function logd(name, action, message, args, trace = false) {
         args = JSON.stringify(args);
     }
 
-    // for customizing output logname and log message name
+    // check name object and set defaults
+    if (!name.name) {
+        name.name = 'logd';
+    }
+    if (!name.color) {
+        name.color = '#fff';
+    }
+    if (!name.bg) {
+        name.bg = '#7A5ACF';
+    }
+    if (!name.logname) {
+        name.logname = '🐼logd';
+    }
+    if (!name.logcolor) {
+        name.logcolor = 'white';
+    }
+    if (!name.logbg) {
+        name.logbg = '#DD3224';
+    }
 
     const traceString = new Error().stack.split('\n').slice(1)
         .map(line => line.trim()).join(' ▷ ');
@@ -130,7 +124,7 @@ function logd(name, action, message, args, trace = false) {
         { text: ' ▷ ', c: 'magenta' },
         { text: action, c: 'lightgreen' },
         { text: ' • ', c: 'magenta' },
-        { text: message, c: 'white' },
+        { text: message, c: 'white' }
     ];
 
     if (args) {
@@ -146,7 +140,7 @@ function logd(name, action, message, args, trace = false) {
     if (trace) {
         logc([
             { text: ' • ', c: 'magenta' },
-            { text: traceString, c: 'white' },
+            { text: traceString, c: 'white' }
         ]);
     }
 
@@ -164,11 +158,13 @@ function logd(name, action, message, args, trace = false) {
 
     // Store in localStorage
     try {
-        const debugLog = JSON.parse(localStorage.getItem('_debug_log') || '[]');
+        const debugLog = JSON.parse(window.localStorage.getItem('_debug_log') || '[]');
         debugLog.push(logEntry);
 
         // Keep only last 100
-        if (debugLog.length > 100) debugLog.shift();
+        if (debugLog.length > 100) {
+            debugLog.shift();
+        }
 
         localStorage.setItem('_debug_log', JSON.stringify(debugLog));
 
@@ -180,35 +176,13 @@ function logd(name, action, message, args, trace = false) {
     }
 }
 
-// Export Scope: Vanilla has autoload functionality //
-// !Note:use type module to use import
-if (
-    typeof module !== 'undefined' &&
-    module.exports && typeof window !== 'undefined' &&
-    localStorage.getItem('_debug') === 'true'
-) {
+
+/** *********************EXPORTS************************* */
+// Attach to the window object
+if (typeof window !== 'undefined') {
     window.logc = logc;
     window.logd = logd;
 }
 
-// CommonJS (Node.js/require)
-// !NOTE Mulpiple you return in an object array
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        logc,
-        logd
-    };
-}
-    /** ******************************************************** */
-
-    // Export for CommonJS/UMD
-    // ********************************************************
-    if (typeof module !== 'undefined' && module.exports) {
-        module.exports = FoxinSearch;
-    }
-
-    // Export for AMD
-    return FoxinSearch;
-    // ********************************************************
-
-}));
+// Export it using ES6 syntax for default export
+export { logc, logd };
