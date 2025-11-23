@@ -114,11 +114,11 @@ deploy:npm:
   script:
     - echo "🔵 Publishing to npm..."
     - |
-      if [ -z "$NPM_TOKEN" ]; then
-        echo "❌ NPM_TOKEN not set. Skipping npm publish."
+      if [ -z "$NPM_API_KEY" ]; then
+        echo "❌ NPM_API_KEY not set. Skipping npm publish."
         exit 1
       fi
-    - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+    - echo "//registry.npmjs.org/:_authToken=${NPM_API_KEY}" > .npmrc
     - npm whoami
     - npm publish --access public
     - echo "✅ Published to npm!"
@@ -148,11 +148,11 @@ deploy:npm:auto:
   script:
     - echo "🔵 Auto-publishing to npm..."
     - |
-      if [ -z "$NPM_TOKEN" ]; then
-        echo "❌ NPM_TOKEN not set. Skipping npm publish."
+      if [ -z "$NPM_API_KEY" ]; then
+        echo "❌ NPM_API_KEY not set. Skipping npm publish."
         exit 1
       fi
-    - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+    - echo "//registry.npmjs.org/:_authToken=${NPM_API_KEY}" > .npmrc
     - npm whoami
     - npm publish --access public
     - echo "✅ Published to npm!"
