@@ -89,7 +89,7 @@ deploy:generic:
     - VERSION=$(jq -r .version package.json)
     - echo "🔵 Uploading artifacts for version ${VERSION}..."
     # Define the list of files to upload
-    - FILES="logcad.esm.js logcad.esm.js.map logcad.esm.min.js logcad.js logcad.js.map logcad.min.js logcad.min.js.map"
+    - FILES="(ls dist/)"
     - |
       for FILE in $FILES; do
         echo "Uploading dist/$FILE..."
@@ -122,10 +122,6 @@ deploy:npm:
     - npm whoami
     - npm publish --access public
     - echo "✅ Published to npm!"
-    - echo ""
-    - echo "🔵 Package available on jsDelivr:"
-    - echo "   https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${CI_COMMIT_TAG:-latest}/dist/logcad.min.js"
-    - echo "   https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${CI_COMMIT_TAG:-latest}/dist/logcad.esm.js"
   only:
     - tags
   except:
