@@ -8,7 +8,7 @@
         import { logd } from './dist/logcad.esm.js';
         logd({ name: 'logd' }, 'action', 'message');
     </script>-->
-    <script src="../dist/logcad.min.js"></script>
+    <script src="../dist/logcad.js"></script>
     <script>
         // Test logc 
         logc([
@@ -40,6 +40,8 @@
             { name: 'file', value: '5213', config_enabled: true },
             true
         );
+        // output debug log from local storage
+        logdrl({ action: 'myactin'});
         
     </script>
 </head>
