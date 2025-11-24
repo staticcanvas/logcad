@@ -89,7 +89,7 @@ deploy:generic:
     - VERSION=$(jq -r .version package.json)
     - echo "🔵 Uploading artifacts for version ${VERSION}..."
     # Define the list of files to upload
-    - FILES="(ls dist/)"
+    - FILES=dist/*
     - |
       for FILE in $FILES; do
         echo "Uploading dist/$FILE..."
@@ -152,10 +152,6 @@ deploy:npm:auto:
     - npm whoami
     - npm publish --access public
     - echo "✅ Published to npm!"
-    - echo ""
-    - echo "🔵 Package available on jsDelivr:"
-    - echo "   https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${CI_COMMIT_TAG}/dist/logcad.min.js"
-    - echo "   https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${CI_COMMIT_TAG}/dist/logcad.esm.js"
   only:
     - /^v?\d+\.\d+\.\d+$/  # Matches v1.0.0 or 1.0.0 format
   when: on_success
