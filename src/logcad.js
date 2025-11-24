@@ -177,12 +177,71 @@ function logd(name, action, message, args, trace = false) {
 }
 
 
+/**
+* @description Remove all debug logs from local storage
+* @param {object} filter - The filter object.
+
+* @properties
+* @param {string} [filter.name] - The name of the logger.
+* @param {string} [filter.message] - The message of the log.
+* @param {string} [filter.action] - The action of the log.
+* @param {string[]} [filter.args] - The arguments of the log.
+* @returns {void}
+*
+* @example
+*  // filter by name
+*  logdrl({ name: 'logd' });
+*  // filter by message
+*  logdrl({ message: 'message' });
+*  // filter by action
+*  logdrl({ action: 'action' });
+*  // filter by args
+*  logdrl({ args: ['arg1', 'arg2'] });
+*  // filter by multiple fields
+*  logdrl({ name: 'logd', message: 'message', action: 'action', args: ['arg1', 'arg2'] });
+*/
+
+function logdrl(filter = {}) {
+    let log_messages = JSON.parse(localStorage.getItem('_debug_log') || '[]');
+
+    // Normalize filters
+    const filter_name = typeof filter.name === "string" ? filter.name.toLowerCase() : null;
+    const filter_message = typeof filter.message === "string" ? filter.message.toLowerCase() : null;
+    const filter_action = typeof filter.action === "string" ? filter.action.toLowerCase() : null;
+    const filter_args = Array.isArray(filter.args) ? filter.args : null;
+
+    // Apply filtering only for fields that exist
+    log_messages = log_messages.filter(log => {
+        const name = (log.name || "").toLowerCase();
+        const message = (log.message || "").toLowerCase();
+        const action = (log.action || "").toLowerCase();
+        const args = Array.isArray(log.args) ? log.args : [];
+
+        // Only match if the filter field exists
+        if (filter_name && !name.includes(filter_name)) return false;
+        if (filter_message && !message.includes(filter_message)) return false;
+        if (filter_action && !action.includes(filter_action)) return false;
+
+        // args filter: ALL filter args must be in log.args
+        if (filter_args && !filter_args.every(a => args.includes(a))) return false;
+
+        return true;
+    });
+
+    // Output logs
+    for (const log of log_messages) {
+        logc(log.styles);
+    }
+}
+
+
 /** *********************EXPORTS************************* */
 // Attach to the window object
 if (typeof window !== 'undefined') {
     window.logc = logc;
     window.logd = logd;
+    window.logdrl = logdrl;
 }
 
 // Export it using ES6 syntax for default export
-export { logc, logd };
+export { logc, logd, logdrl };
