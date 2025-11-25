@@ -4,7 +4,7 @@
 
 A lightweight utility for styled console logging and simple debug message capture.
 
-[![gitlab-license](https://img.shields.io/gitlab/license/staticcanvas/logcad?style=flat&&labelColor=00ffff&color=0000af&logoColor=ffffff)](https://gitlab.com/staticcanvas/logcad/-/blob/main/README.md?ref_type=heads) [![gitlab](https://img.shields.io/gitlab/pipeline-status/staticcanvas/logcad?style=flat&logo=gitlab&labelColor=00ffff&color=0000af)](https://gitlab.com/staticcanvas) [![npm](https://img.shields.io/npm/v/logcad?style=flat&logo=npm&labelColor=00ffff&color=0000af)](https://www.npmjs.com/package/logcad) [![jsdelivr](https://img.shields.io/jsdelivr/npm/hm/logcad?style=flat&logo=jsdelivr&labelColor=00ffff&color=0000af)](https://cdn.jsdelivr.net/package/npm/logcad)
+[![gitlab-license](https://img.shields.io/gitlab/license/staticcanvas/logcad?style=flat&&labelColor=00ffff&color=0000af&logoColor=ffffff)](https://gitlab.com/staticcanvas/logcad/-/blob/main/README.md?ref_type=heads) [![gitlab](https://img.shields.io/gitlab/pipeline-status/staticcanvas/logcad?style=flat&logo=gitlab&labelColor=00ffff&color=0000af)](https://gitlab.com/staticcanvas) [![npm](https://img.shields.io/npm/v/@staticcanvas/logcad?style=flat&logo=npm&labelColor=00ffff&color=0000af)](https://www.npmjs.com/package/logcad) [![jsdelivr](https://img.shields.io/jsdelivr/npm/hm/logcad?style=flat&logo=jsdelivr&labelColor=00ffff&color=0000af)](https://www.jsdelivr.com/package/npm/@staticcanvas/logcad)
 
 ## ◾**Overview**
 - **Purpose**: Logs CSS-styled messages to the browser console and captures short debug entries to `localStorage` for lightweight client-side debugging.
