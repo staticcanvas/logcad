@@ -91,17 +91,24 @@ A lightweight utility for styled console logging and simple debug message captur
     - `trace` (***boolean***): If true, includes a stack trace in the output and saved entry.
   - **Behavior**: Appends a structured entry to the `_debug_log` array in `localStorage` (keeps last 100 entries) and dispatches `window` `CustomEvent` named `debuglog` with the new entry in `detail`.
 
+  - **`logdrl()`**: Prints the `_debug_log` array from `localStorage` to the console.
+
 ### **Example**
 - Perform a simple styled message and a debug entry:
 
   ```javascript
+  // log message in the color
   logc([
     { text: 'Server', c: 'white', bg: 'green', b: true },
     { text: ' ✓ ', c: 'lightgreen' },
     { text: 'Ready', c: 'white' }
   ]);
 
+  // log debug
   logd({ name: 'server', logname: 'server' }, 'listen', 'Server listening', { port: 8080 });
+
+  // read debug log
+  logdrl();
   ```
 
 **Development**
