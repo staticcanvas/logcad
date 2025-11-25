@@ -205,25 +205,33 @@ function logdrl(filter = {}) {
     let log_messages = JSON.parse(localStorage.getItem('_debug_log') || '[]');
 
     // Normalize filters
-    const filter_name = typeof filter.name === "string" ? filter.name.toLowerCase() : null;
-    const filter_message = typeof filter.message === "string" ? filter.message.toLowerCase() : null;
-    const filter_action = typeof filter.action === "string" ? filter.action.toLowerCase() : null;
+    const filter_name = typeof filter.name === 'string' ? filter.name.toLowerCase() : null;
+    const filter_message = typeof filter.message === 'string' ? filter.message.toLowerCase() : null;
+    const filter_action = typeof filter.action === 'string' ? filter.action.toLowerCase() : null;
     const filter_args = Array.isArray(filter.args) ? filter.args : null;
 
     // Apply filtering only for fields that exist
     log_messages = log_messages.filter(log => {
-        const name = (log.name || "").toLowerCase();
-        const message = (log.message || "").toLowerCase();
-        const action = (log.action || "").toLowerCase();
+        const name = (log.name || '').toLowerCase();
+        const message = (log.message || '').toLowerCase();
+        const action = (log.action || '').toLowerCase();
         const args = Array.isArray(log.args) ? log.args : [];
 
         // Only match if the filter field exists
-        if (filter_name && !name.includes(filter_name)) return false;
-        if (filter_message && !message.includes(filter_message)) return false;
-        if (filter_action && !action.includes(filter_action)) return false;
+        if (filter_name && !name.includes(filter_name)) {
+            return false;
+        }
+        if (filter_message && !message.includes(filter_message)) {
+            return false;
+        }
+        if (filter_action && !action.includes(filter_action)) {
+            return false;
+        }
 
         // args filter: ALL filter args must be in log.args
-        if (filter_args && !filter_args.every(a => args.includes(a))) return false;
+        if (filter_args && !filter_args.every(a => args.includes(a))) {
+            return false;
+        }
 
         return true;
     });
