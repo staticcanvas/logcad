@@ -82,7 +82,9 @@ build:
 deploy:generic:
   stage: deploy
   image: node:18
-  needs: ["build"]
+  needs: 
+    - job: build
+      artifacts: true
   before_script:
     - apt-get update && apt-get install -y jq
   script:
