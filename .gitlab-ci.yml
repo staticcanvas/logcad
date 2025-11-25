@@ -114,7 +114,7 @@ deploy:npm:
   script:
     - echo "🔵 Publishing to npm..."
     - |
-      if [ -z "$NPM_API_KEY" ]; then
+      if [ -z "${NPM_API_KEY}" ]; then
         echo "❌ NPM_API_KEY not set. Skipping npm publish."
         exit 1
       fi
