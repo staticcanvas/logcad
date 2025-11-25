@@ -8,7 +8,10 @@ A lightweight utility for styled console logging and simple debug message captur
 
 ## ◾**Overview**
 - **Purpose**: Logs CSS-styled messages to the browser console and captures short debug entries to `localStorage` for lightweight client-side debugging.
-- **Key exports**: `logc` (styled console output), `logd` (debug logger that records to `localStorage`).
+- **Key exports**: 
+  - `logc` (styled console output)
+  - `logd` (debug logger that records to `localStorage`, dispatches a `debuglog` event).
+  - `logdrl` (debug log reader that reads from `localStorage` and dispatches a `debuglog` event).
 
 ## ◾ **Features**
 - **Styled console output**: Compose messages using simple objects (color, background, bold/italic/underline, border).
