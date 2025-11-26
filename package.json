@@ -1,7 +1,7 @@
 {
     "name": "@staticcanvas/logcad",
-    "version": "0.3.0",
-    "description": "Utility to log styled messages to the console.",
+    "version": "0.4.1",
+    "description": "A lightweight utility for styled console logging and simple debug message capture.",
     "main": "dist/logcad.js",
     "module": "dist/logcad.esm.js",
     "jsdelivr": "dist/logcad.min.js",
@@ -24,7 +24,8 @@
         "color",
         "logging",
         "javascript",
-        "es6"
+        "es6",
+        "console"
     ],
     "author": {
         "name": "Garvey K. Snow",
