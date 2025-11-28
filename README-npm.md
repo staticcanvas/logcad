@@ -1,3 +1,7 @@
+# <img src="https://raw.githubusercontent.com/staticcanvas/general-resources/main/logos/logcad/dist/png/logcad-128x128.png" width="64" > **Logcad**( log color and debug )
+
+A lightweight utility for styled console logging and simple debug message capture.
+
 ## ◾ **Features**
 - **Styled console output**: Compose messages using simple objects (color, background, bold/italic/underline, border).
 - **Debug log Event**: Dispatches a `debuglog` event for realtime consumers.
