@@ -61,8 +61,8 @@ export default defineConfig({
                     name: pkg_name_WNNS, 
                     dir: 'dist/dist', 
                     entryFileNames: `${pkg_name_WNNS}.js`,
-                    sourcemap: true
-                    // exports: 
+                    sourcemap: true,
+                    exports: 'named'    // <--- Explicitly tell Rollup these are named exports
                 },
                 // 2. UMD Minified
                 { 
@@ -72,7 +72,8 @@ export default defineConfig({
                     `${pkg_name_WNNS}.min.js`, 
                     sourcemap: true,
                     plugins: [terser({ format: { comments: false } })],
-                    // exports: 'default'
+                    exports: 'named'    // <--- Explicitly tell Rollup these are named exports
+
                 },
                 // 3. ESM Standard
                 { 
