@@ -2,9 +2,9 @@
  * @description This function logs styled messages to the console. It takes an array of objects, where each object specifies the text and optional style properties to apply.
  * @param {Array<Object>} objectArray - Array of objects defining the text and style properties for each message.
  * @returns {void}
- * 
+ *
  * -------------
- * 
+ *
  * @Properties
  * @param {Array<Object>} objectArray[].text - description
  * @param {string}  objectArray[].text - The text to be logged.
@@ -20,14 +20,14 @@
  *  @example
  * // log a single message with defaults
  * logc([ { text: "This is the first log message"} ]);
- * 
+ *
  * // Log multiple messages with custom styles
  * logc([
  *      { text: "This is the first log message", c: "blue", bg: "green", u: true, b: false, i: true },
  *      { text: "And this is another message", c: "red", bg: "yellow", b: true, u: true },
  *      { text: "And this is another message", c: "red", border: "1px solid red" },
  *  ]);
- * 
+ *
  * // or
  * const messages = []
  * messages.push({ text: "This is the first log message", c: "blue", bg: "green", u: true, b: false, i: true });
@@ -96,10 +96,10 @@ function logc(objectArray) {
 *
 *  // log message with custom styling, meta, and stack trace
 *  logd(
-*      { name: 'logd', color: '#fff', bg: '#7A5ACF', logname: '🐼', logcolor: white }, 
-*      action, 
-*      message, 
-*      args, 
+*      { name: 'logd', color: '#fff', bg: '#7A5ACF', logname: '🐼', logcolor: white },
+*      action,
+*      message,
+*      args,
 *      trace = true
 *  );
 */
@@ -114,7 +114,7 @@ function logd(name, action, message, args, trace = false) {
     // check name object and set defaults
     // TODO: add styling for message color and action
     // TODO: add styling for json!optional and args
-    // NOTE: keep or removde stack trace as from within console. line number is provide by console output     
+    // NOTE: keep or removde stack trace as from within console. line number is provide by console output
     if (!name.name) {
         name.name = 'logd';
     }
