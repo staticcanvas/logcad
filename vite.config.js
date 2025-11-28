@@ -27,9 +27,11 @@ const bannerText = `
   @homepage ${pkg.homepage}
   @github ${pkg.author.github}
   @gitlab ${pkg.author.gitlab}
-  @CompiledBy ${pkg.extras.compliedBy}
+  @CompiledWith
+      > Vite: v${pkg.extras.compliedBy.vite}
+      > Date: ${new Date().toISOString()}
   @lintedBy ${pkg.extras.lintedBy}
-  @compiled ${new Date().toISOString()}
+  
 `;
 
 export default defineConfig({

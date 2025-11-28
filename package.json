@@ -1,6 +1,6 @@
 {
     "name": "@staticcanvas/logcad",
-    "version": "0.4.3",
+    "version": "0.4.4",
     "description": "A lightweight utility for styled console logging and simple debug message capture in the console",
     "license": "MIT",
     "type": "module",
@@ -8,18 +8,24 @@
     "module": "dist/logcad.esm.js",
     "jsdelivr": "dist/logcad.min.js",
     "unpkg": "dist/logcad.min.js",
+    "homepage": "https://gitlab.com/staticcanvas/logcad#readme",
     "exports": {
         "import": "./dist/logcad.esm.js"
     },
     "extras": {
-        "compliedBy": "vite(rollup)"
+        "compliedBy": {
+            "rollup": "v3.12.1",
+            "vite": "v7.2.4",
+            "eslint": "^9.17.0",
+            "node": ">=18.0.0"
+        }
     },
     "author": {
         "name": "Garvey K. Snow",
         "email": "sgkens@gmail.com",
         "url": "https://gitlab.com/staticcanvas/logcad",
         "github": "https://github.com/staticcanvas/logcad",
-        "compliedBy": "vite(rollup)"
+        "gitlab": "https://gitlab.com/staticcanvas/logcad"
     },
     "keywords": [
         "log",
