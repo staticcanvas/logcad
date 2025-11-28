@@ -120,6 +120,7 @@ deploy:npm:
         echo "❌ NPM_API_KEY not set. Skipping npm publish."
         exit 1
       fi
+    - cd dist
     - echo "//registry.npmjs.org/:_authToken=${NPM_API_KEY}" > .npmrc
     - npm whoami
     - npm publish --access public
