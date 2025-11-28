@@ -41,7 +41,7 @@ export default defineConfig({
         emptyOutDir: true,
 
         // Target ES2015 (ES6) to ensure broad compatibility (closest to ES5 without bloating)
-        target: 'es2015',
+        target: ['es2015'],
 
         lib: {
             entry: resolve(__dirname, `src/${pkg_name_WNNS}.js`),
@@ -62,6 +62,7 @@ export default defineConfig({
                     dir: 'dist/dist', 
                     entryFileNames: `${pkg_name_WNNS}.js`,
                     sourcemap: true
+                    // exports: 
                 },
                 // 2. UMD Minified
                 { 
@@ -70,7 +71,8 @@ export default defineConfig({
                     dir: 'dist/dist', entryFileNames: 
                     `${pkg_name_WNNS}.min.js`, 
                     sourcemap: true,
-                    plugins: [terser({ format: { comments: false } })] 
+                    plugins: [terser({ format: { comments: false } })],
+                    // exports: 'default'
                 },
                 // 3. ESM Standard
                 { 
