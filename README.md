@@ -9,9 +9,9 @@ A lightweight utility for styled console logging and simple debug message captur
 ## ◾**Overview**
 - **Purpose**: Logs CSS-styled messages to the browser console and captures short debug entries to `localStorage` for lightweight client-side debugging.
 - **Key exports**: 
-  - `logc` (styled console output)
-  - `logd` (debug logger that records to `localStorage`, dispatches a `debuglog` event).
-  - `logdrl` (debug log reader that reads from `localStorage` and dispatches a `debuglog` event).
+  - `logcad.logc` (styled console output)
+  - `logcad.logd` (debug logger that records to `localStorage`, dispatches a `debuglog` event).
+  - `logcad.logdrl` (debug log reader that reads from `localStorage` and dispatches a `debuglog` event).
 
 ## ◾ **Features**
 - **Styled console output**: Compose messages using simple objects (color, background, bold/italic/underline, border).
@@ -73,7 +73,7 @@ Packages are available on npm by related jsdilver and unpkg cdns.
 
 ## 🟢 **Quick Start**
 
-- **Vanilla(`UMD(browser)`)** via `<script src="path|url">` tag:
+- **Vanilla(`UMD(browser)`)** via `<script src="path|url">` tag: will be available in the global scope via `window.logcad`, `window.logc`,  `window.logd`. `window.logdrl`.
   ```html
   <script src="path/to/logcad.js"></script>
   <!-- or via cdn: jsdelivr -->
@@ -83,20 +83,27 @@ Packages are available on npm by related jsdilver and unpkg cdns.
   ```
   ```javascript
   // UMD
-  logc([
+  logcad.logc([
     { text: 'Hello UMD(browser)', c: '#fff', bg: '#333', b: true },
     { text: ' Export Type', c: '#fff', bg: '#333', b: true }
   ]);
 
-  logd(
+  logcad.logd(
     { name: 'app', logname: 'app' }, 
     'init', 
     'App initialized', 
     { user: 'alice' }
   );
+
+  logcad.logdrl(
+    { name: 'app', logname: 'app' }, 
+    'init', 
+    'App initialized',
+  )
+  // or access via `window.logc` and `window.logd` which can be called via logc, logd, logdrl as they are available in the global scope in browser environment
   ```
 
-- **ESM6 Module(`ESM6(browser)` with `type="module"`)**:
+- **ESM6 Module(`ESM6(browser)` with `type="module"`)**: import from file or cdn and walla!
 
   ```javascript
   import { logc, logd } from 'path/to/logcad.js';
