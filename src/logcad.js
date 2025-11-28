@@ -1,25 +1,39 @@
-/**
+/** * * * * * * * * * * * * * * * * * * * * * * * * * * **
  * @description This function logs styled messages to the console. It takes an array of objects, where each object specifies the text and optional style properties to apply.
  * @param {Array<Object>} objectArray - Array of objects defining the text and style properties for each message.
  * @returns {void}
+ * 
  * -------------
+ * 
  * @Properties
  * @param {Array<Object>} objectArray[].text - description
- * @param {string} objectArray[].text - The text to be logged.
- * @param {string} [objectArray[].c="#000"] - The color of the text. Default is black.
- * @param {string} [objectArray[].bg="transparent"] - The background color of the text. Default is transparent.
+ * @param {string}  objectArray[].text - The text to be logged.
+ * @param {string}  [objectArray[].c="#000"] - The color of the text. Default is black.
+ * @param {string}  [objectArray[].bg="transparent"] - The background color of the text. Default is transparent.
  * @param {boolean} [objectArray[].b=false] - Whether the text should be bold. Default is false.
  * @param {boolean} [objectArray[].i=false] - Whether the text should be italic. Default is false.
  * @param {boolean} [objectArray[].u=false] - Whether the text should be underlined. Default is false.
- * @param {string} [objectArray[].border="none"] - The border style of the text. Default is none.
+ * @param {string}  [objectArray[].border="none"] - The border style of the text. Default is none.
  *
- * @example
-
- *  logc([
- *       { text: "This is the first log message", c: "blue", bg: "green", u: true, b: false, i: true },
- *       { text: "And this is another message", c: "red", bg: "yellow", b: true, u: true },
- *       { text: "And this is another message", c: "red", border: "1px solid red" },
- *   ]);
+ * -------------
+ *
+ *  @example
+ * // log a single message with defaults
+ * logc([ { text: "This is the first log message"} ]);
+ * 
+ * // Log multiple messages with custom styles
+ * logc([
+ *      { text: "This is the first log message", c: "blue", bg: "green", u: true, b: false, i: true },
+ *      { text: "And this is another message", c: "red", bg: "yellow", b: true, u: true },
+ *      { text: "And this is another message", c: "red", border: "1px solid red" },
+ *  ]);
+ * 
+ * // or
+ * const messages = []
+ * messages.push({ text: "This is the first log message", c: "blue", bg: "green", u: true, b: false, i: true });
+ * messages.push({ text: "And this is another message", c: "red", bg: "yellow", b: true, u: true });
+ * messages.push({ text: "And this is another message", c: "red", border: "1px solid red" });
+ * logc(messages);
  */
 
 function logc(objectArray) {
@@ -66,7 +80,7 @@ function logc(objectArray) {
 }
 
 
-/**
+/** * * * * * * * * * * * * * * * * * * * * * * * * * * **
 * @description This function uses the `logc` function to logs styled debug messages to the console.
 * @param {object} name - name of the logger and styling
 * @param {string} action - The action being performed.
@@ -78,14 +92,16 @@ function logc(objectArray) {
 *
 * @example
 *  // log message with default styling and meta
+*  logd( { name: 'logd' }, 'action', 'message' );
+*
+*  // log message with custom styling, meta, and stack trace
 *  logd(
-*      { name: 'logd' },
-*      'action',
-*      'message',
-*      {args},
-*      trace = false
+*      { name: 'logd', color: '#fff', bg: '#7A5ACF', logname: '🐼', logcolor: white }, 
+*      action, 
+*      message, 
+*      args, 
+*      trace = true
 *  );
-*  logd({ name: 'logd', color: '#fff', bg: '#7A5ACF', logname: '🐼', logcolor: white }, action, message, args, trace = false);
 */
 
 function logd(name, action, message, args, trace = false) {
@@ -96,6 +112,9 @@ function logd(name, action, message, args, trace = false) {
     }
 
     // check name object and set defaults
+    // TODO: add styling for message color and action
+    // TODO: add styling for json!optional and args
+    // NOTE: keep or removde stack trace as from within console. line number is provide by console output     
     if (!name.name) {
         name.name = 'logd';
     }
@@ -106,7 +125,7 @@ function logd(name, action, message, args, trace = false) {
         name.bg = '#7A5ACF';
     }
     if (!name.logname) {
-        name.logname = '🐼logd';
+        name.logname = '⊖ logd';
     }
     if (!name.logcolor) {
         name.logcolor = 'white';
@@ -177,15 +196,15 @@ function logd(name, action, message, args, trace = false) {
 }
 
 
-/**
-* @description Remove all debug logs from local storage
+/** * * * * * * * * * * * * * * * * * * * * * * * * * * **
+* @description This function filters the debug log based on the provided filter object.
 * @param {object} filter - The filter object.
 
-* @properties
-* @param {string} [filter.name] - The name of the logger.
-* @param {string} [filter.message] - The message of the log.
-* @param {string} [filter.action] - The action of the log.
-* @param {string[]} [filter.args] - The arguments of the log.
+* @properties { }
+* @property {string} filter.name - The name of the logger.
+* @property {string} [filter.message] - The message of the log.
+* @property {string} [filter.action] - The action of the log.
+* @property {string[]} [filter.args] - The arguments of the log.
 * @returns {void}
 *
 * @example
