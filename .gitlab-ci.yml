@@ -91,12 +91,13 @@ deploy:generic:
     - VERSION=$(jq -r .version package.json)
     - echo "🔵 Uploading artifacts for version ${VERSION}..."
     # Define the list of files to upload
-    - FILES=dist/*
+    - cd dist
+    - FILES=./*
     - |
       for FILE in $FILES; do
-        echo "Uploading dist/$FILE..."
+        echo "Uploading $FILE..."
         curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
-             --upload-file "dist/$FILE" \
+             --upload-file "$FILE" \
              "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${VERSION}/${FILE}"
       done
     - echo "✅ All artifacts uploaded to Generic Registry"
@@ -120,6 +121,7 @@ deploy:npm:
         echo "❌ NPM_API_KEY not set. Skipping npm publish."
         exit 1
       fi
+    - cd dist
     - echo "//registry.npmjs.org/:_authToken=${NPM_API_KEY}" > .npmrc
     - npm whoami
     - npm publish --access public

@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import globals from 'globals';
+import prettierConfig from 'eslint-config-prettier'; // <--- 1. Import this
 
 export default [
     js.configs.recommended,
@@ -8,6 +9,7 @@ export default [
             ecmaVersion: 2022,
             sourceType: 'module',
             globals: {
+                // ... (Your manual globals kept as requested)
                 console: 'readonly',
                 document: 'readonly',
                 window: 'readonly',
@@ -25,8 +27,8 @@ export default [
                 Set: 'readonly',
                 JSON: 'readonly',
                 Math: 'readonly',
-                ...globals.browser, // allows browser globals
-                ...globals.node     // allows node globals
+                ...globals.browser,
+                ...globals.node
             },
             parserOptions: {
                 ecmaVersion: 2022,
@@ -34,7 +36,8 @@ export default [
             }
         },
         rules: {
-            'no-unused-vars': ['warn', { 
+            // --- LOGIC RULES (Keep these!) ---
+            'no-unused-vars': ['warn', {
                 argsIgnorePattern: '^_',
                 varsIgnorePattern: '^_'
             }],
@@ -44,14 +47,19 @@ export default [
             'prefer-const': 'warn',
             'no-var': 'error',
             'eqeqeq': ['error', 'always'],
-            'curly': ['error', 'all'],
-            'brace-style': ['error', '1tbs'],
-            'semi': ['error', 'always'],
-            'quotes': ['warn', 'single', { avoidEscape: true }],
-            'comma-dangle': ['warn', 'never'],
-            'indent': ['warn', 4, { SwitchCase: 1 }],
-            'no-trailing-spaces': 'warn',
-            'eol-last': ['warn', 'always']
+            'curly': ['error', 'all'], // Prettier respects this
+
+            // --- STYLING RULES (HANDLED BY PRETTIER NOW) ---
+            // I have commented these out because Prettier overrides them.
+            // If you keep them, ESLint might yell at Prettier.
+
+            // 'brace-style': ['error', '1tbs'],
+            // 'semi': ['error', 'always'],
+            // 'quotes': ['warn', 'single', { avoidEscape: true }],
+            // 'comma-dangle': ['warn', 'never'],
+            // 'indent': ['warn', 4, { SwitchCase: 1 }],
+            // 'no-trailing-spaces': 'warn',
+            // 'eol-last': ['warn', 'always']
         }
     },
     {
@@ -73,6 +81,9 @@ export default [
             'coverage/**',
             '*.min.js'
         ]
-    }
-];
+    },
 
+    // <--- 2. Add Prettier Config LAST
+    // This turns off any rule above that would conflict with Prettier formatting.
+    prettierConfig
+];

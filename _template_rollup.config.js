@@ -1,12 +1,13 @@
 import commonjs from '@rollup/plugin-commonjs';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
-import terser from '@rollup/plugin-terser';
+import copy from 'rollup-plugin-copy'; // https://www.npmjs.com/package/rollup-plugin-copy
+import { nodeResolve } from '@rollup/plugin-node-resolve'; // https://www.npmjs.com/package/@rollup/plugin-node-resolve
+import terser from '@rollup/plugin-terser'; // https://www.npmjs.com/package/@rollup/plugin-terser
 import { readFileSync } from 'fs';
 
 const pkg = JSON.parse(readFileSync('./package.json', 'utf8'));
 const isProduction = process.env.NODE_ENV === 'production';
 
-// 1. Configure Minification (Strip ALL comments)
+// Configure Minification (Strip ALL comments)
 const minifyPlugin = terser({
     format: {
         comments: false, // Removes all comments (including license headers)
@@ -20,16 +21,18 @@ const banner = `/*!
  * @license ${pkg.license}
  * @author ${pkg.author.name}
  * @homepage ${pkg.homepage}
+ * @github ${pkg.author.github}
+ * @CompiledBy ${pkg.author.name}
+ * @compiled ${new Date().toISOString()}
  */`;
 
 /*  @SOURCES
- * @see {@link https://rollupjs.org/guide/en/#configuration-files}
  * @see {@link https://rollupjs.org/guide/en/#configuration-files}
 */
 export default {
     input: ['src/logcad.js'],
     output: [
-        // --- 1. UMD (Standard) ---
+        // --- OUTPUT1:  UMD (Standard) ---
         {
             file: 'dist/logcad.js',
             format: 'umd',
@@ -38,7 +41,7 @@ export default {
             sourcemap: !isProduction
         },
 
-        // --- 2. UMD (Minified) ---
+        // --- OUTPUT2: UMD (Minified) ---
         {
             file: 'dist/logcad.min.js',
             format: 'umd',
@@ -48,7 +51,7 @@ export default {
             plugins: [minifyPlugin] // Apply minification specifically here
         },
 
-        // --- 3. ESM (Standard) ---
+        // --- OUTPUT3: ESM (Standard) ---
         {
             file: 'dist/logcad.esm.js',
             format: 'es',
@@ -56,7 +59,7 @@ export default {
             sourcemap: !isProduction
         },
 
-        // --- 4. ESM (Minified) ---
+        // --- OUTPUT4: ESM (Minified) ---
         {
             file: 'dist/logcad.esm.min.js',
             format: 'es',
@@ -69,6 +72,18 @@ export default {
             browser: true,
             preferBuiltins: false
         }),
-        commonjs()
+        commonjs(),
+        // FIX: rollup-plugin-copy 
+        // - Instead using default package.json which has a contraint,
+        //    FIX:rollup-plugin-copy use rollup to copy package.json, readme and license to dist and use
+        //    dist as the package folder for npm 
+        // -  Include src for furture debugging will increase bundle size but helps with debugging
+        copy({
+            targets: [
+                { src: 'src', dest: 'dist' },
+                { src: 'README-npm.md', dest: 'dist', rename: 'README.md' },
+                { src: 'package.json', dest: 'dist' }
+            ]
+        })
     ]
 };
