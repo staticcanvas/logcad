@@ -15,7 +15,7 @@ A lightweight utility for styled console logging and simple debug message captur
    - Link from a ***jsdelivr*** CDN
    - Link from a ***unpkg*** CDN
   
-    > If you used a `CDN` link, you're good to go! `logcad` will be available in the global scope via `window.logc`, `window.logd`, and `window.logdrl` functions.
+    > If you used a `CDN` link, you're good to go! `logcad` will be available in the global scope via `window.logc`, `window.logd`, and `window.logdrl` or `logcad` namespace.
 
 2. **NPM**: `npm install logcad@latest --save --save-dev`
     - add `logcad` as a devDependency and don't forget to add it in your `package.json` dependencies.
@@ -36,27 +36,36 @@ Node.js for local builds; runs in modern browsers that provide `console`, `local
   <script src="https://unpkg.com/@staticcanvas/logcad@0.3.0/dist/logcad.js"></script>
   ```
   ```javascript
-  // UMD
-  logc([
+  // UMD (browser)
+  logcad.logc([
     { text: 'Hello UMD(browser)', c: '#fff', bg: '#333', b: true },
     { text: ' Export Type', c: '#fff', bg: '#333', b: true }
   ]);
 
-  logd(
+  logcad.logd(
     { name: 'app', logname: 'app' }, 
     'init', 
     'App initialized', 
     { user: 'alice' }
   );
+
+  logcad.logdrl(
+    { name: 'app', logname: 'app' }, 
+    'init', 
+    'App initialized',
+  )
+
+  // or access via `window.logc` and `window.logd` which can be called via logc, logd, logdrl as they are available in the global scope in browser environment
   ```
 
 - **ESM6 Module(`ESM6(browser)` with `type="module"`)**:
 
   ```javascript
+  // Import from local path
   import { logc, logd } from 'path/to/logcad.js';
-  // or
+  // or import from a CDN
   import { logc, logd } from 'https://cdn.jsdelivr.net/npm/@staticcanvas/logcad@{version}/dist/logcad.esm.js';
-  // or 
+  // or import namespaced logc, logd in logcad namespace
   import logcad from 'https://cdn.jsdelivr.net/npm/@staticcanvas/logcad@{version}/dist/logcad.esm.js';
 
   // UMD

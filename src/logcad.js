@@ -271,4 +271,4 @@ if (typeof window !== 'undefined') {
 }
 
 // Export it using ES6 syntax for default export
-export { logc, logd, logdrl };
+export default { logc, logd, logdrl };

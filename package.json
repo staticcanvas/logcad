@@ -1,6 +1,6 @@
 {
     "name": "@staticcanvas/logcad",
-    "version": "0.4.4",
+    "version": "0.4.8",
     "description": "A lightweight utility for styled console logging and simple debug message capture in the console",
     "license": "MIT",
     "type": "module",
