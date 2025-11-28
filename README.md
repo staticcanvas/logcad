@@ -39,14 +39,19 @@ scripts:
 
 ## ◾ **Installation**
 
-1. **Node / local**:    
+1. **CDN**:    
    - Link from a ***jsdelivr*** CDN
-    - link from a ***unpkg*** CDN
-2. Use `npm install logcad --save --save-dev`
+   - Link from a ***unpkg*** CDN
+  
+    > If you used a `CDN` link, you're good to go! `logcad` will be available in the global scope via `window.logc`, `window.logd`, and `window.logdrl` functions.
+
+2. **NPM**: `npm install logcad@latest --save --save-dev`
     - add `logcad` as a devDependency and don't forget to add it in your `package.json` dependencies.
 
-> **🛑Requirements**: \
-> Node.js for local builds; runs in modern browsers that provide `console`, `localStorage`, and `CustomEvent`.
+    > If you used `npm install`, you can require it from your code with `require('logcad')` or `import logcad from 'logcad'` in your code.
+
+**🛑 Requirements**: \
+Node.js for local builds; runs in modern browsers that provide `console`, `localStorage`, and `CustomEvent`.
 
 ## 🌐 CDNS
 
