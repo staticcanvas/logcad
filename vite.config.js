@@ -59,7 +59,7 @@ export default defineConfig({
                 {
                     format: 'umd', 
                     name: pkg_name_WNNS, 
-                    dir: 'dist', 
+                    dir: 'dist/dist', 
                     entryFileNames: `${pkg_name_WNNS}.js`,
                     sourcemap: true
                 },
@@ -67,7 +67,7 @@ export default defineConfig({
                 { 
                     format: 'umd', 
                     name: pkg_name_WNNS, 
-                    dir: 'dist', entryFileNames: 
+                    dir: 'dist/dist', entryFileNames: 
                     `${pkg_name_WNNS}.min.js`, 
                     sourcemap: true,
                     plugins: [terser({ format: { comments: false } })] 
@@ -75,14 +75,14 @@ export default defineConfig({
                 // 3. ESM Standard
                 { 
                     format: 'es', 
-                    dir: 'dist', 
+                    dir: 'dist/dist', 
                     entryFileNames: `${pkg_name_WNNS}.esm.js`,
                     sourcemap: true
                 },
                 // 4. ESM Minified
                 { 
                     format: 'es', 
-                    dir: 'dist', 
+                    dir: 'dist/dist', 
                     entryFileNames: `${pkg_name_WNNS}.esm.min.js`,
                     sourcemap: true,
                     plugins: [terser({ format: { comments: false } })]
@@ -93,6 +93,8 @@ export default defineConfig({
     plugins: [
         banner(bannerText),
         copy({
+            // This is so we can copy files to dist and publish from 
+            // dist with custom readme etc
             targets: [
                 // A. Handle README: Rename README-npm.md to README.md in dist
                 { src: 'README-npm.md', dest: 'dist', rename: 'README.md' },
@@ -103,7 +105,7 @@ export default defineConfig({
                 // C. MAGIC STEP: Copy & Patch package.json
                 {
                     src: 'package.json',
-                    dest: 'dist',
+                    dest: 'dist', 
                     transform: (contents) => {
                         const json = JSON.parse(contents.toString());
 
@@ -126,7 +128,11 @@ export default defineConfig({
 
                         return JSON.stringify(json, null, 2);
                     }
-                }
+                },
+                // D. copy source files to dist
+                { src: 'src', dest: 'dist' },
+                
+                // E. 
             ],
             hook: 'writeBundle' // Run after build finishes
         })

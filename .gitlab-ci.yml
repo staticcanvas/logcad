@@ -212,6 +212,12 @@ release:
       ```javascript
       // ESM (Module)
       import logcad from 'https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
+      // or  
+      import { logcad } from 'https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
+      // or 
+      import * as logcad from 'https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
+      // or
+      const { logc, logd, logdrl } = await import('https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js');
       ```
     # Direct links to the Generic Registry files uploaded in the previous step
     assets:
