@@ -5,7 +5,7 @@
  */
 
 import { defineConfig } from 'vite';
-import banner from 'vite-plugin-banner';
+// import banner from 'vite-plugin-banner';
 import copy from 'rollup-plugin-copy';
 import { resolve } from 'path';
 import fs from 'fs';
@@ -19,20 +19,24 @@ const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 // as files will be written to dist/package-name
 const pkg_name_WNNS = pkg.name.split('/').pop();
 
-const bannerText = `
-  ${pkg.name} v${pkg.version}
+const bannertext =`/**
+  ${pkg_name_WNNS} 
+  ................................
   ${pkg.description}
-  @license ${pkg.license}
-  @author ${pkg.author.name}
-  @homepage ${pkg.homepage}
-  @github ${pkg.author.github}
-  @gitlab ${pkg.author.gitlab}
+  
+  @Version v${pkg.version}
+  @Author ${pkg.author.name}
+  @License ${pkg.license}
+  @Homepage ${pkg.homepage}
+  
   @CompiledWith
       > Vite: v${pkg.extras.compliedBy.vite}
       > Date: ${new Date().toISOString()}
-  @lintedBy ${pkg.extras.lintedBy}
   
-`;
+  @Repository
+      > gitlab: ${pkg.author.gitlab}
+      > github: ${pkg.author.github}
+*/`;
 
 export default defineConfig({
     build: {
@@ -62,17 +66,38 @@ export default defineConfig({
                     dir: 'dist/dist', 
                     entryFileNames: `${pkg_name_WNNS}.js`,
                     sourcemap: true,
-                    exports: 'named'    // <--- Explicitly tell Rollup these are named exports
+                    exports: 'named',    // <--- Explicitly tell Rollup these are named exports
+                    plugins: [
+                        terser({
+                            compress: false,
+                            mangle: false,
+                            format: {
+                                beautify: true,      // Keep indentation and newlines
+                                comments: true,
+                                preamble: bannertext
+                            }
+                        })
+                    ],
                 },
                 // 2. UMD Minified
                 { 
                     format: 'umd', 
                     name: pkg_name_WNNS, 
-                    dir: 'dist/dist', entryFileNames: 
-                    `${pkg_name_WNNS}.min.js`, 
+                    dir: 'dist/dist', 
+                    entryFileNames: `${pkg_name_WNNS}.min.js`, 
                     sourcemap: true,
-                    plugins: [terser({ format: { comments: false } })],
-                    exports: 'named'    // <--- Explicitly tell Rollup these are named exports
+                    exports: 'named',    // <--- Explicitly tell Rollup these are named exports
+                    plugins: [
+                        terser({
+                            compress: true,
+                            mangle: true,
+                            format: {
+                                // beautify: true,      // Keep indentation and newlines
+                                comments: /@license|@author|@Compiled|@homepage|@github|@gitlab|@CompiledWith|> Vite:|> Date:/i,
+                                preamble: bannertext
+                            }
+                        })
+                    ],
 
                 },
                 // 3. ESM Standard
@@ -80,7 +105,18 @@ export default defineConfig({
                     format: 'es', 
                     dir: 'dist/dist', 
                     entryFileNames: `${pkg_name_WNNS}.esm.js`,
-                    sourcemap: true
+                    sourcemap: true,
+                    plugins: [
+                        terser({
+                            compress: false,
+                            mangle: false,
+                            format: {
+                                beautify: true,      // Keep indentation and newlines
+                                comments: true,
+                                preamble: bannertext
+                            }
+                        })
+                    ],
                 },
                 // 4. ESM Minified
                 { 
@@ -88,13 +124,22 @@ export default defineConfig({
                     dir: 'dist/dist', 
                     entryFileNames: `${pkg_name_WNNS}.esm.min.js`,
                     sourcemap: true,
-                    plugins: [terser({ format: { comments: false } })]
+                    plugins: [
+                        terser({ 
+                            compress: true,
+                            mangle: true,
+                            format: { 
+                                // beautify: true,      // Keep indentation and newlines
+                                comments: /@license|@author|@Compiled|@homepage|@github|@gitlab|@CompiledWith|> Vite:|> Date:/i,
+                                preamble: bannertext
+                            } 
+                        })
+                    ]
                 }
             ]
         }
     },
     plugins: [
-        banner(bannerText),
         copy({
             // This is so we can copy files to dist and publish from 
             // dist with custom readme etc
