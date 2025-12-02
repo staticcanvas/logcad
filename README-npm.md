@@ -15,7 +15,7 @@ A lightweight utility for styled console logging and simple debug message captur
    - Link from a ***jsdelivr*** CDN
    - Link from a ***unpkg*** CDN
   
-    > If you used a `CDN` link, you're good to go! `logcad` will be available in the global scope via `window.logc`, `window.logd`, and `window.logdrl` or `logcad` namespace.
+    > If you used a `CDN` link, you're good to go! module attachment is optional via `namespace`, `window`, `direct(call)`.
 
 2. **NPM**: `npm install logcad@latest --save --save-dev`
     - add `logcad` as a devDependency and don't forget to add it in your `package.json` dependencies.
