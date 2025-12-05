@@ -5,18 +5,13 @@
  */
 
 import { defineConfig } from 'vite';
-// import banner from 'vite-plugin-banner';
 import copy from 'rollup-plugin-copy';
 import { resolve } from 'path';
 import fs from 'fs';
 import terser from '@rollup/plugin-terser';
 
-// 1. Read the package.json to get version/author for the banner
 const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 
-// if you have a namespace/org in space the @namespace/package-name format
-// string.split('/').pop() will return package-name without the namespace
-// as files will be written to dist/package-name
 const pkg_name_WNNS = pkg.name.split('/').pop();
 
 const bannertext = `/**
@@ -64,7 +59,7 @@ export default defineConfig({
         {
           format: 'umd',
           name: pkg_name_WNNS,
-          dir: 'dist//logcad/dist',
+          dir: `dist/${pkg_name_WNNS}/dist`,
           entryFileNames: `${pkg_name_WNNS}.js`,
           // sourcemap: true, // unsupport with rullup directory using vite
           exports: 'named', // <--- Explicitly tell Rollup these are named exports
@@ -84,7 +79,7 @@ export default defineConfig({
         {
           format: 'umd',
           name: pkg_name_WNNS,
-          dir: 'dist//logcad/dist',
+          dir: `dist/${pkg_name_WNNS}/dist`,
           entryFileNames: `${pkg_name_WNNS}.min.js`,
           // sourcemap: true, // unsupport with rullup directory using vite
           exports: 'named', // <--- Explicitly tell Rollup these are named exports
@@ -104,7 +99,7 @@ export default defineConfig({
         // 3. ESM Standard
         {
           format: 'es',
-          dir: 'dist/logcad/dist',
+          dir: `dist/${pkg_name_WNNS}/dist`,
           entryFileNames: `${pkg_name_WNNS}.esm.js`,
           // sourcemap: true, // unsupport with rullup directory using vite
           plugins: [
@@ -122,7 +117,7 @@ export default defineConfig({
         // 4. ESM Minified
         {
           format: 'es',
-          dir: 'dist/logcad/dist',
+          dir: `dist/${pkg_name_WNNS}/dist`,
           entryFileNames: `${pkg_name_WNNS}.esm.min.js`,
           // sourcemap: true, // unsupport with rullup directory using vite
           plugins: [
@@ -146,32 +141,20 @@ export default defineConfig({
       // This is so we can copy files to dist and publish from
       // dist with custom readme etc
       targets: [
-        // A. Handle README: Rename README-npm.md to README.md in dist
-        { src: 'README-npm.md', dest: 'dist/logcad', rename: 'README.md' },
+        // Handle README: Rename README-npm.md to README.md in dist
+        { src: 'README-npm.md', dest: `dist/${pkg_name_WNNS}`, rename: 'README.md' },
 
-        // B. Handle License
-        { src: 'LICENSE', dest: 'dist/logcad' },
+        // Handle License
+        { src: 'LICENSE', dest: `dist/${pkg_name_WNNS}` },
 
-        // C. MAGIC STEP: Copy & Patch package.json
+        // MAGIC STEP: Copy & Patch package.json
         {
           src: 'package.json',
-          dest: 'dist/logcad',
+          dest: `dist/${pkg_name_WNNS}`,
           transform: (contents) => {
             const json = JSON.parse(contents.toString());
 
-            // 1. Strip 'dist/' from paths (since this file will BE inside dist)
-            // json.main = `${pkg_name_WNNS}.js`;
-            // json.module = `${pkg_name_WNNS}.esm.js`;
-            // json.jsdelivr = `${pkg_name_WNNS}.min.js`;
-            // json.unpkg = `${pkg_name_WNNS}.min.js`;
-
-            // // 2. Fix Exports (Remove dist/)
-            // json.exports = {
-            //   import: `./${pkg_name_WNNS}.esm.js`,
-            //   require: `./${pkg_name_WNNS}.js`, // Good practice to add require for UMD
-            // };
-
-            // 3. Clean up dev noise
+            // Clean up dev noise
             delete json.scripts;
             delete json.devDependencies;
             delete json.files; // No longer needed as we are inside the folder
@@ -179,10 +162,8 @@ export default defineConfig({
             return JSON.stringify(json, null, 2);
           },
         },
-        // D. copy source files to dist
-        { src: 'src', dest: 'dist/logcad' },
-
-        // E.
+        // copy source files to dist
+        { src: 'src', dest: `dist/${pkg_name_WNNS}` },
       ],
       hook: 'writeBundle', // Run after build finishes
     }),
