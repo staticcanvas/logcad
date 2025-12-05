@@ -60,6 +60,8 @@ lint:
 # ------------------------------------------------------
 build:
   stage: build
+  before_script:
+    - apt-get update && apt-get install -y jq
   script:
     - echo "🔵 Building package..."
     - VERSION=$(jq -r .version package.json)
@@ -86,7 +88,6 @@ build:
 # ------------------------------------------------------
 deploy:generic:
   stage: deploy
-  image: node:18
   needs:
     - job: build
       artifacts: true
@@ -117,7 +118,6 @@ deploy:generic:
 # ------------------------------------------------------
 deploy:npm:
   stage: deploy
-  image: node:18
   needs:
     - job: build
       artifacts: true
@@ -155,7 +155,6 @@ deploy:npm:
 # ------------------------------------------------------
 deploy:npm:auto:
   stage: deploy
-  image: node:18
   needs:
     - job: build
       artifacts: true
