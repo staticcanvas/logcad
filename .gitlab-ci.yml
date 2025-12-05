@@ -1,9 +1,9 @@
 image: node:18
 
 variables:
-  NODE_VERSION: "18"
-  NPM_CONFIG_CACHE: "$CI_PROJECT_DIR/.npm"
-  NPM_CONFIG_PRODUCTION: "false"
+  NODE_VERSION: '18'
+  NPM_CONFIG_CACHE: '$CI_PROJECT_DIR/.npm'
+  NPM_CONFIG_PRODUCTION: 'false'
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
@@ -82,7 +82,7 @@ build:
 deploy:generic:
   stage: deploy
   image: node:18
-  needs: 
+  needs:
     - job: build
       artifacts: true
   before_script:
@@ -91,7 +91,7 @@ deploy:generic:
     - VERSION=$(jq -r .version package.json)
     - echo "🔵 Uploading artifacts for version ${VERSION}..."
     # Define the list of files to upload
-    - cd dist
+    - cd dist/logcad/dist
     - FILES=./*
     - |
       for FILE in $FILES; do
@@ -110,10 +110,13 @@ deploy:generic:
 deploy:npm:
   stage: deploy
   image: node:18
+  needs:
+    - job: build
+      artifacts: true
   before_script:
     - echo "🔵 Preparing npm publish..."
-    - npm ci
-    - npm run build
+    # - npm ci
+    # - npm run build
   script:
     - echo "🔵 Publishing to npm..."
     - |
@@ -121,7 +124,7 @@ deploy:npm:
         echo "❌ NPM_API_KEY not set. Skipping npm publish."
         exit 1
       fi
-    - cd dist
+    - cd dist/logcad
     - echo "//registry.npmjs.org/:_authToken=${NPM_API_KEY}" > .npmrc
     - npm whoami
     - npm publish --access public
@@ -129,7 +132,7 @@ deploy:npm:
   only:
     - tags
   except:
-    - /^v?\d+\.\d+\.\d+.*$/  # Only publish semantic version tags
+    - /^v?\d+\.\d+\.\d+.*$/ # Only publish semantic version tags
   when: manual
   environment:
     name: npm
@@ -141,10 +144,13 @@ deploy:npm:
 deploy:npm:auto:
   stage: deploy
   image: node:18
-  before_script:
-    - echo "🔵 Preparing npm publish..."
-    - npm ci
-    - npm run build
+  needs:
+    - job: build
+      artifacts: true
+  # before_script:
+  #   - echo "🔵 Preparing npm publish..."
+  #   - npm ci
+  #   - npm run build
   script:
     - echo "🔵 Auto-publishing to npm..."
     - |
@@ -154,33 +160,31 @@ deploy:npm:auto:
       fi
     - echo "//registry.npmjs.org/:_authToken=${NPM_API_KEY}" > .npmrc
     - npm whoami
+    - cd ./dist/logcad
     - npm publish --access public
     - echo "✅ Published to npm!"
   only:
-    - /^v?\d+\.\d+\.\d+$/  # Matches v1.0.0 or 1.0.0 format
+    - /^v?\d+\.\d+\.\d+$/ # Matches v1.0.0 or 1.0.0 format
   when: on_success
   environment:
     name: npm
     url: https://www.npmjs.com/package/${CI_PROJECT_NAME}
-    
+
 # ------------------------------------------------------
 # Create GitLab release
 # ------------------------------------------------------
 release:
   stage: deploy
   image: registry.gitlab.com/gitlab-org/release-cli:latest
-  
   # Ensure the upload job finishes first, and we get package.json from build
-  needs: 
+  needs:
     - job: deploy:generic
       artifacts: false
     - job: build
       artifacts: true
-      
   before_script:
     # FIX: Use 'apk' instead of 'apt-get' for Alpine-based release-cli image
     - apk add --no-cache jq
-    
   script:
     - echo "🔵 Preparing release metadata..."
     # Extract version from package.json
@@ -192,18 +196,16 @@ release:
       if [[ "${CI_COMMIT_TAG#v}" != "$VERSION" ]]; then
         echo "⚠️ Warning: Git Tag ($CI_COMMIT_TAG) does not match package.json version ($VERSION)"
       fi
-      
   artifacts:
     reports:
       # This allows the 'release' section below to access $PROJECT_VERSION
       dotenv: build.env
-      
   release:
     name: 'Release $PROJECT_VERSION'
     tag_name: '$CI_COMMIT_TAG'
     description: |
       Automated release for version $PROJECT_VERSION
-      
+
       ## 📦 npm Package
       - [npm package](https://www.npmjs.com/package/${CI_PROJECT_NAME}/v/${PROJECT_VERSION})
 
@@ -212,7 +214,7 @@ release:
       - UMD: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js`
       - ESM-MIN: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js`
       - UMD-MIN: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js`
-    
+
       ## 📋 Usage
 
       ### UMD (Browser)
@@ -223,7 +225,7 @@ release:
       ### ESM (Module)
       ```javascript
       import logcad from '[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
-      // or  
+      // or
       import { logcad } from '[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
       ```
 
@@ -243,6 +245,6 @@ release:
         - name: 'logcad.min.js'
           url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js'
         - name: 'logcad.min.js.map'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js.map' 
+          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js.map'
   only:
     - tags

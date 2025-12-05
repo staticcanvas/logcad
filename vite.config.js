@@ -160,16 +160,16 @@ export default defineConfig({
             const json = JSON.parse(contents.toString());
 
             // 1. Strip 'dist/' from paths (since this file will BE inside dist)
-            json.main = `${pkg_name_WNNS}.js`;
-            json.module = `${pkg_name_WNNS}.esm.js`;
-            json.jsdelivr = `${pkg_name_WNNS}.min.js`;
-            json.unpkg = `${pkg_name_WNNS}.min.js`;
+            // json.main = `${pkg_name_WNNS}.js`;
+            // json.module = `${pkg_name_WNNS}.esm.js`;
+            // json.jsdelivr = `${pkg_name_WNNS}.min.js`;
+            // json.unpkg = `${pkg_name_WNNS}.min.js`;
 
-            // 2. Fix Exports (Remove dist/)
-            json.exports = {
-              import: `./${pkg_name_WNNS}.esm.js`,
-              require: `./${pkg_name_WNNS}.js`, // Good practice to add require for UMD
-            };
+            // // 2. Fix Exports (Remove dist/)
+            // json.exports = {
+            //   import: `./${pkg_name_WNNS}.esm.js`,
+            //   require: `./${pkg_name_WNNS}.js`, // Good practice to add require for UMD
+            // };
 
             // 3. Clean up dev noise
             delete json.scripts;
