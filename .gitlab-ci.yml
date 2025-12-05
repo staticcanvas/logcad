@@ -65,7 +65,9 @@ build:
   script:
     - echo "🔵 Building package..."
     - VERSION=$(jq -r .version package.json)
+    - PROJECT_NAME=$(jq -r .name package.json)
     - echo "PROJECT_VERSION=$VERSION" >> build.env
+    - echo "PROJECT_NAME=$PROJECT_NAME" >> build.env
     - npm ci
     - npm run build
     - echo "✅ Build complete!"
@@ -196,16 +198,8 @@ release:
       artifacts: false
     - job: build
       artifacts: true # Required to import PROJECT_VERSION from build.env
-  script:
-    - echo "🔵 Preparing release metadata..."
-    # 1. Sanity check: Ensure package.json matches the Git Tag
-    # NOTE: We use [ ] instead of [[ ]] because Alpine uses 'sh', not 'bash'
-    - |
-      if [ "${CI_COMMIT_TAG#v}" != "$PROJECT_VERSION" ]; then
-         echo "⚠️ Warning: Git Tag ($CI_COMMIT_TAG) does not match package.json version ($PROJECT_VERSION)"
-      fi
   release:
-    name: 'Release logcad v$PROJECT_VERSION'
+    name: 'Release $PROJECT_NAME v$PROJECT_VERSION'
     tag_name: '$CI_COMMIT_TAG'
     description: |
       Automated release for version $PROJECT_VERSION
@@ -232,21 +226,21 @@ release:
          // or
          import { logcad } from '[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
          ```
-         assets:
-         links:
-             - name: 'logcad.esm.js'
-             url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.esm.js'
-             - name: 'logcad.esm.js.map'
-             url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.esm.js.map'
-             - name: 'logcad.esm.min.js'
-             url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.esm.min.js'
-             - name: 'logcad.js'
-             url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.js'
-             - name: 'logcad.js.map'
-             url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.js.map'
-             - name: 'logcad.min.js'
-             url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js'
-             - name: 'logcad.min.js.map'
-             url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js.map'
+    assets:
+      links:
+        - name: 'logcad.esm.js'
+          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.esm.js'
+        - name: 'logcad.esm.js.map'
+          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.esm.js.map'
+        - name: 'logcad.esm.min.js'
+          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.esm.min.js'
+        - name: 'logcad.js'
+          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.js'
+        - name: 'logcad.js.map'
+          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.js.map'
+        - name: 'logcad.min.js'
+          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js'
+        - name: 'logcad.min.js.map'
+          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js.map'
   only:
     - tags
