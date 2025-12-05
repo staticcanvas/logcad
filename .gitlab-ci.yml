@@ -16,6 +16,7 @@ stages:
   - test
   - build
   - deploy
+  - release
 # ------------------------------------------------------
 # Lint stage
 # ------------------------------------------------------
@@ -171,9 +172,9 @@ deploy:npm:auto:
         echo "❌ NPM_API_KEY not set. Skipping npm publish."
         exit 1
       fi
-    - cd ./dist/logcad
     - echo "//registry.npmjs.org/:_authToken=${NPM_API_KEY}" > .npmrc
     - npm whoami
+    - cd ./dist/logcad
     - npm publish --access public
     - echo "✅ Published to npm!"
   only:
@@ -184,21 +185,28 @@ deploy:npm:auto:
     url: https://www.npmjs.com/package/${CI_PROJECT_NAME}
   artifacts:
     reports:
+      # This allows the 'release' section below to access $PROJECT_VERSION
       dotenv: build.env
 
 # ------------------------------------------------------
 # Create GitLab release
+# As Per: https://docs.gitlab.com/user/project/releases/release_cli/
+#   - Release-cli has been deprecated, use gitlab-cli instead
 # ------------------------------------------------------
-release:
-  stage: deploy
-  image: registry.gitlab.com/gitlab-org/release-cli:latest
+release:gitlab:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/cli:latest
   needs:
     - job: deploy:generic
       artifacts: false
     - job: build
       artifacts: true # Required to import PROJECT_VERSION from build.env
+  script:
+    - echo "🚀 Generating release metadata for version $PROJECT_VERSION..."
+  only:
+    - tags
   release:
-    name: 'Release $PROJECT_NAME v$PROJECT_VERSION'
+    name: 'Release ${PROJECT_NAME} v${PROJECT_VERSION}'
     tag_name: '$CI_COMMIT_TAG'
     description: |
       Automated release for version $PROJECT_VERSION
@@ -241,8 +249,3 @@ release:
           url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js'
         - name: 'logcad.min.js.map'
           url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js.map'
-  only:
-    - tags
-  artifacts:
-    reports:
-      dotenv: build.env
