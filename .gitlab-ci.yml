@@ -171,9 +171,9 @@ deploy:npm:auto:
         echo "❌ NPM_API_KEY not set. Skipping npm publish."
         exit 1
       fi
+    - cd ./dist/logcad
     - echo "//registry.npmjs.org/:_authToken=${NPM_API_KEY}" > .npmrc
     - npm whoami
-    - cd ./dist/logcad
     - npm publish --access public
     - echo "✅ Published to npm!"
   only:
@@ -184,7 +184,6 @@ deploy:npm:auto:
     url: https://www.npmjs.com/package/${CI_PROJECT_NAME}
   artifacts:
     reports:
-      # This allows the 'release' section below to access $PROJECT_VERSION
       dotenv: build.env
 
 # ------------------------------------------------------
@@ -244,3 +243,6 @@ release:
           url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js.map'
   only:
     - tags
+  artifacts:
+    reports:
+      dotenv: build.env
