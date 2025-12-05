@@ -191,26 +191,19 @@ deploy:npm:auto:
 release:
   stage: deploy
   image: registry.gitlab.com/gitlab-org/release-cli:latest
-  # Ensure the upload job finishes first, and we get package.json from build
   needs:
     - job: deploy:generic
       artifacts: false
     - job: build
-      artifacts: true
-  # before_script:
-  #   # FIX: Use 'apk' instead of 'apt-get' for Alpine-based release-cli image
-  #   - apk add --no-cache jq
+      artifacts: true # Required to import PROJECT_VERSION from build.env
   script:
     - echo "🔵 Preparing release metadata..."
-    # 1. Sanity check: Ensure package.json matches the Git Tag (stripping 'v' prefix if present)
+    # 1. Sanity check: Ensure package.json matches the Git Tag
+    # NOTE: We use [ ] instead of [[ ]] because Alpine uses 'sh', not 'bash'
     - |
-      if [[ "${CI_COMMIT_TAG#v}" != "$PROJECT_VERSION" ]]; then
-        echo "⚠️ Warning: Git Tag ($CI_COMMIT_TAG) does not match package.json version ($VERSION)"
+      if [ "${CI_COMMIT_TAG#v}" != "$PROJECT_VERSION" ]; then
+         echo "⚠️ Warning: Git Tag ($CI_COMMIT_TAG) does not match package.json version ($PROJECT_VERSION)"
       fi
-  artifacts:
-    reports:
-      # This allows the 'release' section below to access $PROJECT_VERSION
-      dotenv: build.env
   release:
     name: 'Release logcad v$PROJECT_VERSION'
     tag_name: '$CI_COMMIT_TAG'
@@ -218,44 +211,42 @@ release:
       Automated release for version $PROJECT_VERSION
 
       ## 📦 npm Package
-      - [npm package](https://www.npmjs.com/package/${CI_PROJECT_NAME}/v/${PROJECT_VERSION})
+         - [npm package](https://www.npmjs.com/package/${CI_PROJECT_NAME}/v/${PROJECT_VERSION})
 
-      ## 🌐 jsDelivr CDN
-      - ESM: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js`
-      - UMD: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js`
-      - ESM-MIN: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js`
-      - UMD-MIN: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js`
+         ## 🌐 jsDelivr CDN
+         - ESM: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js`
+         - UMD: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js`
+         - ESM-MIN: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js`
+         - UMD-MIN: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js`
 
-      ## 📋 Usage
+         ## 📋 Usage
 
-      ### UMD (Browser)
-      ```html
-      <script src="[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js"></script>
-      ```
+         ### UMD (Browser)
+         ```html
+         <script src="[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js"></script>
+         ```
 
-      ### ESM (Module)
-      ```javascript
-      import logcad from '[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
-      // or
-      import { logcad } from '[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
-      ```
-
-    # Direct links to the Generic Registry files uploaded in the previous step
-    assets:
-      links:
-        - name: 'logcad.esm.js'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.esm.js'
-        - name: 'logcad.esm.js.map'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.esm.js.map'
-        - name: 'logcad.esm.min.js'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.esm.min.js'
-        - name: 'logcad.js'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.js'
-        - name: 'logcad.js.map'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.js.map'
-        - name: 'logcad.min.js'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js'
-        - name: 'logcad.min.js.map'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js.map'
+         ### ESM (Module)
+         ```javascript
+         import logcad from '[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
+         // or
+         import { logcad } from '[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
+         ```
+         assets:
+         links:
+             - name: 'logcad.esm.js'
+             url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.esm.js'
+             - name: 'logcad.esm.js.map'
+             url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.esm.js.map'
+             - name: 'logcad.esm.min.js'
+             url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.esm.min.js'
+             - name: 'logcad.js'
+             url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.js'
+             - name: 'logcad.js.map'
+             url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.js.map'
+             - name: 'logcad.min.js'
+             url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js'
+             - name: 'logcad.min.js.map'
+             url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js.map'
   only:
     - tags
