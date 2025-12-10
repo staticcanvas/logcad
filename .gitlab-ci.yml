@@ -207,13 +207,17 @@ release:gitlab:
       artifacts: true # Required to import PROJECT_VERSION from build.env
   before_script:
     - echo "🔵 Preparing release publish..."
+    - apt-get update && apt-get install -y curl ca-certificates
+    - curl --location --output /usr/local/bin/release-cli "https://release-cli-downloads.s3.amazonaws.com/latest/release-cli-linux-amd64"
+    - chmod +x /usr/local/bin/release-cli
   script:
     - echo "🚀 Generating release metadata for version $PROJECT_VERSION..."
   only:
     - /^v?\d+\.\d+\.\d+.*$/ # Only publish semantic version tags
   release:
-    name: "Release ${PROJECT_NAME} v${PROJECT_VERSION}"
-    tag_name: "${PROJECT_VERSION}"
+    name: 'Release ${PROJECT_NAME} v${PROJECT_VERSION}'
+    tag_name: '${PROJECT_VERSION}'
+    ref: '$CI_COMMIT_SHA'     
     assets:
       links:
         - name: 'logcad.esm.js'
