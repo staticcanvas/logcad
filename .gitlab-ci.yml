@@ -1,7 +1,7 @@
-image: node:25.2.1-slim
+image: node:${NODE_VERSION}
 
 variables:
-  NODE_VERSION: '18'
+  NODE_VERSION: 'node:25.2.1-slim'
   NPM_CONFIG_CACHE: '$CI_PROJECT_DIR/.npm'
   NPM_CONFIG_PRODUCTION: 'false'
 
@@ -62,9 +62,10 @@ lint:
 build:
   stage: build
   before_script:
+    - echo "🔵 Preparing build..."
     - apt-get update && apt-get install -y jq
   script:
-    - echo "🔵 Building package..."
+    - echo "🟢 Building package..."
     - VERSION=$(jq -r .version package.json)
     - PROJECT_NAME=$(jq -r .name package.json)
     - echo "PROJECT_VERSION=$VERSION" >> build.env
@@ -94,10 +95,10 @@ deploy:generic:
   needs:
     - job: build
       artifacts: true
-  # before_script:
-  #   - apt-get update && apt-get install -y jq
+  before_script:
+    - echo "🔵 Preparing Generic Registry upload..."
   script:
-    - echo "🔵 Uploading artifacts for version ${PROJECT_VERSION}..."
+    - echo "🟢 Uploading artifacts for version ${PROJECT_VERSION}..."
     # Define the list of files to upload
     - cd dist/logcad/dist
     - FILES=./*
@@ -136,11 +137,10 @@ deploy:npm:
     # - npm ci
     # - npm run build
   script:
-    - echo "🔵 Publishing to npm..."
+    - echo "🟢 Publishing to npm..."
     - |
     - cd dist/logcad
     - npm install -g npm@latest
-# - echo "//registry.npmjs.org/:_authToken=${NPM_API_KEY}" > .npmrc # Using ID Token instead
     - npm ci
     - npm whoami
     - npm publish --access public
@@ -174,11 +174,10 @@ deploy:npm:auto:
   before_script:
     - echo "🔵 Preparing npm publish..."
   script:
-    - echo "🔵 Auto-publishing to npm..."
+    - echo "🟢 Auto-publishing to npm..."
     - |
     - cd ./dist/logcad
     - npm install -g npm@latest
-#    - echo "//registry.npmjs.org/:_authToken=${NPM_API_KEY}" > .npmrc # Using ID Token instead
     - npm ci
     - npm publish --access public
     - echo "✅ Published to npm!"
@@ -207,12 +206,31 @@ release:gitlab:
     - job: build
       artifacts: true # Required to import PROJECT_VERSION from build.env
   before_script:
-   - echo "🚀 Generating release metadata for version $PROJECT_VERSION..."
+    - echo "🔵 Preparing release publish..."
+  script:
+    - echo "🚀 Generating release metadata for version $PROJECT_VERSION..."
   only:
     - /^v?\d+\.\d+\.\d+.*$/ # Only publish semantic version tags
   release:
     name: "Release ${PROJECT_NAME} v${PROJECT_VERSION}"
     tag_name: "${PROJECT_VERSION}"
+    assets:
+      links:
+        - name: 'logcad.esm.js'
+          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.esm.js'
+        - name: 'logcad.esm.js.map'
+          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.esm.js.map'
+        - name: 'logcad.esm.min.js'
+          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.esm.min.js'
+        - name: 'logcad.js'
+          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.js'
+        - name: 'logcad.js.map'
+          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.js.map'
+        - name: 'logcad.min.js'
+          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js'
+        - name: 'logcad.min.js.map'
+          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js.map'
+
     description: |
         # 📦 Version ${PROJECT_VERSION} Release
 
@@ -246,20 +264,4 @@ release:gitlab:
         // or
         
         import { logcad } from '[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
-         ```
-    assets:
-      links:
-        - name: 'logcad.esm.js'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.esm.js'
-        - name: 'logcad.esm.js.map'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.esm.js.map'
-        - name: 'logcad.esm.min.js'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.esm.min.js'
-        - name: 'logcad.js'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.js'
-        - name: 'logcad.js.map'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.js.map'
-        - name: 'logcad.min.js'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js'
-        - name: 'logcad.min.js.map'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js.map'
+        ```
