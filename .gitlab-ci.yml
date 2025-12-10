@@ -197,18 +197,16 @@ deploy:npm:auto:
 # As Per: https://jsr.dev/docs/publishing/
 # ------------------------------------------------------
 publish:jsr:auto:
-  stage: release
-  image: node:latest
+  stage: deploy
   needs:
     - job: build
       artifacts: true
-  id_tokens:
-    # This token generates the OIDC signature JSR checks
-    JSR_PROVENANCE_TOKEN:
-      aud: "jsr"
   script:
     # npx jsr publish automatically detects the token above
-    - npx jsr publish --allow-dirty
+    - echo "🟢 Auto-publishing to JSR..."
+    - |
+      cd ./dist/logcad
+      npx jsr publish --token ${JSR_API_KEY} --allow-dirty
   only:
     - /^v?\d+\.\d+\.\d+.*$/
 
@@ -254,35 +252,27 @@ release:gitlab:
           url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js'
         - name: 'logcad.min.js.map'
           url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js.map'
-
     description: |
       # 📦 Version ${PROJECT_VERSION} Release
 
       ## NPM Package
-      
-        - [https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}
+      - https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}
 
       ## 🌐 jsDelivr CDN
-      
-        - ***ES Module***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js`
-        - ***Universal Module***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js`
-        - ***ES Module Minified***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js`
-        - ***Universal Module Minified***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js`
-
-      ## 🌐 jsDelivr CDN
+      - ***ES Module***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js`
+      - ***Universal Module***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js`
+      - ***ES Module Minified***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js`
+      - ***Universal Module Minified***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js`
 
       ## 📋 Usage
 
       ### UMD (Browser)
-      
       ```html
       <script src="[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js"></script>
       ```
 
       ### ESM (Module)
-      
       ```javascript
-      
       import logcad from '[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
       
       // or
