@@ -43,6 +43,7 @@
     "build": "vite build",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
+    "update:npm": "npm install -g npm@latest",
     "serve:example": "npm run build && http-server examples -p 8080",
     "publish:npm": "npm run lint:fix && npm run build && cd dist/logcad && echo //registry.npmjs.org/:_authToken=${NPM_API_KEY} > .npmrc && npm publish --access public"
   },

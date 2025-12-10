@@ -139,7 +139,8 @@ deploy:npm:
     - echo "🔵 Publishing to npm..."
     - |
     - cd dist/logcad
-    - echo "//registry.npmjs.org/:_authToken=${NPM_API_KEY}" > .npmrc
+    - npm install -g npm@latest
+# - echo "//registry.npmjs.org/:_authToken=${NPM_API_KEY}" > .npmrc # Using ID Token instead
     - npm ci
     - npm whoami
     - npm publish --access public
@@ -176,7 +177,8 @@ deploy:npm:auto:
     - echo "🔵 Auto-publishing to npm..."
     - |
     - cd ./dist/logcad
-    - echo "//registry.npmjs.org/:_authToken=${NPM_API_KEY}" > .npmrc
+    - npm install -g npm@latest
+#    - echo "//registry.npmjs.org/:_authToken=${NPM_API_KEY}" > .npmrc # Using ID Token instead
     - npm ci
     - npm publish --access public
     - echo "✅ Published to npm!"
@@ -210,32 +212,41 @@ release:gitlab:
   only:
     - /^v?\d+\.\d+\.\d+.*$/ # Only publish semantic version tags
   release:
-    name: 'Release ${PROJECT_NAME} v${PROJECT_VERSION}'
-    tag_name: '${PROJECT_VERSION}'
+    name: "Release ${PROJECT_NAME} v${PROJECT_VERSION}"
+    tag_name: "${PROJECT_VERSION}"
     description: |
-      Automated release for version $PROJECT_VERSION
+        # 📦 Version ${PROJECT_VERSION} Release
 
-      ## 📦 npm Package
-         - [npm package](https://www.npmjs.com/package/${CI_PROJECT_NAME}/v/${PROJECT_VERSION})
+        ## NPM Package
+        
+         - https://www.npmjs.com/package/${CI_PROJECT_NAME}/v/${PROJECT_VERSION}
 
-         ## 🌐 jsDelivr CDN
-         - ESM: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js`
-         - UMD: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js`
-         - ESM-MIN: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js`
-         - UMD-MIN: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js`
+        ## 🌐 jsDelivr CDN
+        
+         - ***ES Module***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js`
+         - ***Universal Module***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js`
+         - ***ES Module Minified***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js`
+         - ***Universal Module Minified***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js`
 
-         ## 📋 Usage
+        ## 🌐 jsDelivr CDN
 
-         ### UMD (Browser)
-         ```html
-         <script src="[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js"></script>
-         ```
+        ## 📋 Usage
 
-         ### ESM (Module)
-         ```javascript
-         import logcad from '[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
-         // or
-         import { logcad } from '[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
+        ### UMD (Browser)
+        
+        ```html
+        <script src="[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js"></script>
+        ```
+
+        ### ESM (Module)
+        
+        ```javascript
+        
+        import logcad from '[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
+        
+        // or
+        
+        import { logcad } from '[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
          ```
     assets:
       links:
