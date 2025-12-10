@@ -4,7 +4,7 @@
 
 A lightweight utility for styled console logging and simple debug message capture.
 
-[![gitlab-license](https://img.shields.io/gitlab/license/staticcanvas/logcad?style=flat&&labelColor=00ffff&color=0000af&logoColor=ffffff)](https://gitlab.com/staticcanvas/logcad/-/blob/main/README.md?ref_type=heads) [![gitlab](https://img.shields.io/gitlab/pipeline-status/staticcanvas/logcad?style=flat&logo=gitlab&labelColor=00ffff&color=0000af)](https://gitlab.com/staticcanvas) [![npm](https://img.shields.io/npm/v/@staticcanvas/logcad?style=flat&logo=npm&labelColor=00ffff&color=0000af)](https://www.npmjs.com/package/logcad) [![jsdelivr](https://img.shields.io/jsdelivr/npm/hm/logcad?style=flat&logo=jsdelivr&labelColor=00ffff&color=0000af)](https://www.jsdelivr.com/package/npm/@staticcanvas/logcad)
+[![gitlab-license](https://img.shields.io/gitlab/license/staticcanvas/logcad?style=flat&&labelColor=00ffff&color=0000af&logoColor=ffffff)](https://gitlab.com/staticcanvas/logcad/-/blob/main/README.md?ref_type=heads) [![npm](https://img.shields.io/npm/v/@staticcanvas/logcad?style=flat&logo=npm&labelColor=00ffff&color=0000af)](https://www.npmjs.com/package/logcad) [![jsr.io](https://img.shields.io/jsr/v/staticcanvas/logcad?style=flat&logo=jsr&labelColor=00ffff&color=0000af)](https://www.jsr.io/npm/@staticcanvas/logcad) [![jsdelivr](https://img.shields.io/jsdelivr/npm/hm/logcad?style=flat&logo=jsdelivr&labelColor=00ffff&color=0000af)](https://www.jsdelivr.com/package/npm/@staticcanvas/logcad) [![unpkg](https://img.shields.io/npm/v/@staticcanvas/logcad?style=flat&logo=unpkg&labelColor=00ffff&color=0000af&label=unpkg)](https://unpkg.com/@staticcanvas/logcad)
 
 ## ◾**Overview**
 - **Purpose**: Logs CSS-styled messages to the browser console and captures short debug entries to `localStorage` for lightweight client-side debugging.
@@ -19,7 +19,10 @@ A lightweight utility for styled console logging and simple debug message captur
 - **Debug capture**: `logd` stores debug entries in `localStorage` under `_debug_log` and dispatches a `debuglog` event for realtime consumers.
 - **Zero dependencies**: Pure JavaScript, designed for use in browser environments and CommonJS builds.
 
-## Build
+## **Build**
+
+[![gitlab](https://img.shields.io/gitlab/pipeline-status/staticcanvas/logcad?style=flat&logo=gitlab&labelColor=00ffff&color=0000af)](https://gitlab.com/staticcanvas)
+
 
 Build uses `vite.js` and custom `rollup.js` config to bundle and or minify for targets `esm`, and `umd`.
 
@@ -33,29 +36,36 @@ scripts:
     build
     lint
     lint:fix
+    update:npm
     serve:example
     publish:npm
 ```
 
-## ◾ **Installation**
+### **Artifacts**
 
-1. **CDN**:    
+Artifacts are available on [GitLab Releases](https://gitlab.com/staticcanvas/logcad/-/releases) 
+
+##  **Installation**
+
+* **CDN**:    
    - Link from a ***jsdelivr*** CDN
    - Link from a ***unpkg*** CDN
+      > If you used a `CDN` link, you're good to go! `logcad` will be available in the global scope via `window.logc`, `window.logd`, and `window.logdrl` functions or just `logc`, `logd`, and `logdrl` functions as they are available in the global scope in browser environment.
   
-    > If you used a `CDN` link, you're good to go! `logcad` will be available in the global scope via `window.logc`, `window.logd`, and `window.logdrl` functions or just `logc`, `logd`, and `logdrl` functions.
-    > if you use a `CND` with `type=module`:
+  - if you use a `CND` with `type=module`:
     ```javascript
     import * as logcad from 'https://cdn.jsdelivr.net/npm/@staticcanvas/logcad@{version}/dist/logcad.esm.js';
     // logcad is now available in the global scope `window.logc`, `window.logd`, `window.logdrl` or just `logc`, `logd`, `logdrl`
     ```
 
-2. **NPM**: `npm install logcad@latest --save --save-dev`
-    - add `logcad` as a devDependency and don't forget to add it in your `package.json` dependencies.
-
-    > If you used `npm install`, you can require it from your code with `require('logcad')` or `import logcad from 'logcad'` in your code.
-
-**🛑 Requirements**: \
+* **NPM**: `npm install logcad@latest --save --save-dev`
+    - Add `logcad` as a devDependency and don't forget to add it in your `package.json` dependencies.
+    - Use: 
+      ```javascript
+      import * as logcad from 'logcad';`
+      ```
+> !note \
+> **🛑 Requirements**: \
 Node.js for local builds; runs in modern browsers that provide `console`, `localStorage`, and `CustomEvent`.
 
 ## 🌐 CDNS
@@ -64,17 +74,19 @@ Packages are available on npm by related jsdilver and unpkg cdns.
 
 | ***JSDELIVR*** | LINK |
 |---|---|
-| **umd** | `https://cdn.jsdelivr.net/npm/@staticcanvas/logcad@{version}/dist/logcad.js` |
-| **umd-minified** | `https://cdn.jsdelivr.net/npm/@staticcanvas/logcad@{version}/dist/logcad.min.js` |
-| **esm** | `https://cdn.jsdelivr.net/npm/@staticcanvas/logcad@{version}/dist/logcad.esm.js` |
-| **esm-minified** | `https://cdn.jsdelivr.net/npm/@staticcanvas/logcad@{version}/dist/logcad.esm.min.js`  |
+| **USD** | `https://cdn.jsdelivr.net/npm/@staticcanvas/logcad@{version}/dist/logcad.js` |
+| **USD minified** | `https://cdn.jsdelivr.net/npm/@staticcanvas/logcad@{version}/dist/logcad.min.js` |
+| **ESM Module** | `https://cdn.jsdelivr.net/npm/@staticcanvas/logcad@{version}/dist/logcad/+esm'` |
+| **ESM Module minified** | `https://cdn.jsdelivr.net/npm/@staticcanvas/logcad@{version}/dist/logcad.esm.min.js`  |
 
 | ***UNPKG*** | LINK |
 |---|---|
-| **umd** | `https://unpkg.com/@staticcanvas/logcad@{version}/dist/logcad.js` |
-| **umd-minified** | `https://unpkg.com/@staticcanvas/logcad@{version}/dist/logcad.min.js` |
-| **esm** | `https://unpkg.com/@staticcanvas/logcad@{version}/dist/logcad.esm.min.js` |
-| **esm-minified** | `https://unpkg.com/@staticcanvas/logcad@{version}/dist/logcad.esm.min.js`  |
+| **USD** | `https://unpkg.com/@staticcanvas/logcad@{version}/dist/logcad.js` |
+| **USD minified** | `https://unpkg.com/@staticcanvas/logcad@{version}/dist/logcad.min.js` |
+| **ESM Module minified** | `https://unpkg.com/@staticcanvas/logcad@{version}/dist/logcad.esm.min.js` |
+| **ESM Module** | `https://unpkg.com/@staticcanvas/logcad@{version}/dist/logcad.esm.min.js`  |
+
+https://cdn.jsdelivr.net/npm/@staticcanvas/logcad@0.4.10/+esm
 
 ## 🟢 **Quick Start**
 
@@ -183,14 +195,8 @@ Packages are available on npm by related jsdilver and unpkg cdns.
 ## Roadmap
 
 - [ ] Support for multiple log levels (debug, info, warning, error)
-  - controlled by `loglevel` variable in `src/logcad.js`
-  - cant pull from `localStorage` `_debug_log_level` variable
-
-
-## **Artifacts**
-
-Artifacts are available on [GitLab](https://gitlab.com/staticcanvas/logcad/-/releases) 
-
+  - [ ] controlled by `loglevel` variable in `src/logcad.js`
+  - [x] can pull from `localStorage` `_debug_log_level` variable
 
 
 ## **License**
