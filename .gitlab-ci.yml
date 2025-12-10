@@ -1,4 +1,4 @@
-image: node:18
+image: node:25.2.1-slim
 
 variables:
   NODE_VERSION: '18'
@@ -206,9 +206,8 @@ release:gitlab:
       artifacts: false
     - job: build
       artifacts: true # Required to import PROJECT_VERSION from build.env
-  before_script: [] # This prevents the global script (which causes the "unexpected redirection" error) from running.
-  script:
-    - echo "🚀 Generating release metadata for version $PROJECT_VERSION..."
+  before_script:
+   - echo "🚀 Generating release metadata for version $PROJECT_VERSION..."
   only:
     - /^v?\d+\.\d+\.\d+.*$/ # Only publish semantic version tags
   release:
