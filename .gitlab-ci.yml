@@ -236,36 +236,36 @@ release:gitlab:
           url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js.map'
 
     description: |
-        # 📦 Version ${PROJECT_VERSION} Release
+      # 📦 Version ${PROJECT_VERSION} Release
 
-        ## NPM Package
-        
-         - [https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}
+      ## NPM Package
+      
+        - [https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}
 
-        ## 🌐 jsDelivr CDN
-        
-         - ***ES Module***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js`
-         - ***Universal Module***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js`
-         - ***ES Module Minified***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js`
-         - ***Universal Module Minified***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js`
+      ## 🌐 jsDelivr CDN
+      
+        - ***ES Module***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js`
+        - ***Universal Module***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js`
+        - ***ES Module Minified***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js`
+        - ***Universal Module Minified***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js`
 
-        ## 🌐 jsDelivr CDN
+      ## 🌐 jsDelivr CDN
 
-        ## 📋 Usage
+      ## 📋 Usage
 
-        ### UMD (Browser)
-        
-        ```html
-        <script src="[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js"></script>
-        ```
+      ### UMD (Browser)
+      
+      ```html
+      <script src="[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js"></script>
+      ```
 
-        ### ESM (Module)
-        
-        ```javascript
-        
-        import logcad from '[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
-        
-        // or
-        
-        import { logcad } from '[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
-        ```
+      ### ESM (Module)
+      
+      ```javascript
+      
+      import logcad from '[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
+      
+      // or
+      
+      import { logcad } from '[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
+      ```
