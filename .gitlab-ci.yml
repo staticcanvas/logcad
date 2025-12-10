@@ -199,7 +199,7 @@ deploy:npm:auto:
 # ------------------------------------------------------
 release:gitlab:
   stage: release
-  image: registry.gitlab.com/gitlab-org/cli:latest
+  image: gitlab/glab:latest
   needs:
     - job: deploy:generic
       artifacts: false
