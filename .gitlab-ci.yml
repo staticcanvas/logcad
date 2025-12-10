@@ -199,7 +199,7 @@ deploy:npm:auto:
 # ------------------------------------------------------
 release:gitlab:
   stage: release
-  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  image: debian:bookworm-slim
   needs:
     - job: deploy:generic
       artifacts: false
