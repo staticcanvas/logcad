@@ -191,6 +191,26 @@ deploy:npm:auto:
     reports:
       # This allows the 'release' section below to access $PROJECT_VERSION
       dotenv: build.env
+      
+# ------------------------------------------------------
+# Publish to JSR (JavaScript Registry) for supply chain security
+# As Per: https://jsr.dev/docs/publishing/
+# ------------------------------------------------------
+publish:jsr:auto:
+  stage: release
+  image: node:latest
+  needs:
+    - job: build
+      artifacts: true
+  id_tokens:
+    # This token generates the OIDC signature JSR checks
+    JSR_PROVENANCE_TOKEN:
+      aud: "jsr"
+  script:
+    # npx jsr publish automatically detects the token above
+    - npx jsr publish --allow-dirty
+  only:
+    - /^v?\d+\.\d+\.\d+.*$/
 
 # ------------------------------------------------------
 # Create GitLab release
