@@ -118,12 +118,19 @@ deploy:generic:
 
 # ------------------------------------------------------
 # Deploy to npm (triggers jsDelivr automatically)
+# > to bypass npm 2FA for automated releases
+# > use https://docs.npmjs.com/trusted-publishers
 # ------------------------------------------------------
 deploy:npm:
   stage: deploy
   needs:
     - job: build
       artifacts: true
+  id_tokens:
+    NPM_ID_TOKEN:
+      aud: "npm:registry.npmjs.org"
+    SIGSTORE_ID_TOKEN:
+      aud: sigstore
   before_script:
     - echo "🔵 Preparing npm publish..."
     # - npm ci
@@ -131,12 +138,9 @@ deploy:npm:
   script:
     - echo "🔵 Publishing to npm..."
     - |
-      if [ -z "${NPM_API_KEY}" ]; then
-        echo "❌ NPM_API_KEY not set. Skipping npm publish."
-        exit 1
-      fi
     - cd dist/logcad
     - echo "//registry.npmjs.org/:_authToken=${NPM_API_KEY}" > .npmrc
+    - npm ci
     - npm whoami
     - npm publish --access public
     - echo "✅ Published to npm!"
@@ -155,24 +159,27 @@ deploy:npm:
 
 # ------------------------------------------------------
 # Auto-deploy on version tags (v1.0.0, 1.0.0, etc.)
+# > to bypass npm 2FA for automated releases
+# > use https://docs.npmjs.com/trusted-publishers
 # ------------------------------------------------------
 deploy:npm:auto:
   stage: deploy
   needs:
     - job: build
       artifacts: true
+  id_tokens:
+    NPM_ID_TOKEN:
+      aud: "npm:registry.npmjs.org"
+    SIGSTORE_ID_TOKEN:
+      aud: sigstore
   before_script:
     - echo "🔵 Preparing npm publish..."
-    - npm ci
   script:
     - echo "🔵 Auto-publishing to npm..."
     - |
-      if [ -z "$NPM_API_KEY" ]; then
-        echo "❌ NPM_API_KEY not set. Skipping npm publish."
-        exit 1
-      fi
     - cd ./dist/logcad
     - echo "//registry.npmjs.org/:_authToken=${NPM_API_KEY}" > .npmrc
+    - npm ci
     - npm publish --access public
     - echo "✅ Published to npm!"
   only:
