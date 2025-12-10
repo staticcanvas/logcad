@@ -161,10 +161,9 @@ deploy:npm:auto:
   needs:
     - job: build
       artifacts: true
-  # before_script:
-  #   - echo "🔵 Preparing npm publish..."
-  #   - npm ci
-  #   - npm run build
+  before_script:
+    - echo "🔵 Preparing npm publish..."
+    - npm ci
   script:
     - echo "🔵 Auto-publishing to npm..."
     - |
@@ -172,9 +171,8 @@ deploy:npm:auto:
         echo "❌ NPM_API_KEY not set. Skipping npm publish."
         exit 1
       fi
-    - echo "//registry.npmjs.org/:_authToken=${NPM_API_KEY}" > .npmrc
-    - npm whoami
     - cd ./dist/logcad
+    - echo "//registry.npmjs.org/:_authToken=${NPM_API_KEY}" > .npmrc
     - npm publish --access public
     - echo "✅ Published to npm!"
   only:
@@ -205,7 +203,9 @@ release:gitlab:
   script:
     - echo "🚀 Generating release metadata for version $PROJECT_VERSION..."
   only:
-    - /^v?\d+\.\d+\.\d+$/ # Matches v1.0.0 or 1.0.0 format
+    - tags
+  except:
+    - /^v?\d+\.\d+\.\d+.*$/ # Only publish semantic version tags
   release:
     name: 'Release ${PROJECT_NAME} v${PROJECT_VERSION}'
     tag_name: '${PROJECT_VERSION}'
