@@ -110,7 +110,7 @@ deploy:generic:
       done
     - echo "✅ All artifacts uploaded to Generic Registry"
   only:
-    - tags
+    - /^v?\d+\.\d+\.\d+.*$/ # Only publish semantic version tags
   artifacts:
     reports:
       # This allows the 'release' section below to access $PROJECT_VERSION
@@ -145,8 +145,6 @@ deploy:npm:
     - npm publish --access public
     - echo "✅ Published to npm!"
   only:
-    - tags
-  except:
     - /^v?\d+\.\d+\.\d+.*$/ # Only publish semantic version tags
   when: manual
   environment:
@@ -210,8 +208,6 @@ release:gitlab:
   script:
     - echo "🚀 Generating release metadata for version $PROJECT_VERSION..."
   only:
-    - tags
-  except:
     - /^v?\d+\.\d+\.\d+.*$/ # Only publish semantic version tags
   release:
     name: 'Release ${PROJECT_NAME} v${PROJECT_VERSION}'
