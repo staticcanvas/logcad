@@ -199,7 +199,7 @@ deploy:npm:auto:
 # ------------------------------------------------------
 release:gitlab:
   stage: release
-  image: gitlab/glab:latest
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
   needs:
     - job: deploy:generic
       artifacts: false
@@ -236,7 +236,7 @@ release:gitlab:
 
         ## NPM Package
         
-         - https://www.npmjs.com/package/${CI_PROJECT_NAME}/v/${PROJECT_VERSION}
+         - [https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}
 
         ## 🌐 jsDelivr CDN
         
