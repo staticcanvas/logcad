@@ -43,7 +43,12 @@ scripts:
    - Link from a ***jsdelivr*** CDN
    - Link from a ***unpkg*** CDN
   
-    > If you used a `CDN` link, you're good to go! `logcad` will be available in the global scope via `window.logc`, `window.logd`, and `window.logdrl` functions.
+    > If you used a `CDN` link, you're good to go! `logcad` will be available in the global scope via `window.logc`, `window.logd`, and `window.logdrl` functions or just `logc`, `logd`, and `logdrl` functions.
+    > if you use a `CND` with `type=module`:
+    ```javascript
+    import * as logcad from 'https://cdn.jsdelivr.net/npm/@staticcanvas/logcad@{version}/dist/logcad.esm.js';
+    // logcad is now available in the global scope `window.logc`, `window.logd`, `window.logdrl` or just `logc`, `logd`, `logdrl`
+    ```
 
 2. **NPM**: `npm install logcad@latest --save --save-dev`
     - add `logcad` as a devDependency and don't forget to add it in your `package.json` dependencies.

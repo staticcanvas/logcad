@@ -15,12 +15,18 @@ A lightweight utility for styled console logging and simple debug message captur
    - Link from a ***jsdelivr*** CDN
    - Link from a ***unpkg*** CDN
   
-    > If you used a `CDN` link, you're good to go! module attachment is optional via `namespace`, `window`, `direct(call)`.
+    > If you used a `CDN` link, you're good to go! `logcad` will be available in the global scope via `window.logc`, `window.logd`, and `window.logdrl` functions or just `logc`, `logd`, and `logdrl` functions as they are available in the global scope in browser environment.
+    > if you use a `CND` with `type=module`:
+    ```javascript
+    import * as logcad from 'https://cdn.jsdelivr.net/npm/@staticcanvas/logcad@{version}/dist/logcad.esm.js';
+    // logcad is now available in the global scope `window.logc`, `window.logd`, `window.logdrl` or just `logc`, `logd`, `logdrl`
+    ```
 
 2. **NPM**: `npm install logcad@latest --save --save-dev`
-    - add `logcad` as a devDependency and don't forget to add it in your `package.json` dependencies.
-
-    > If you used `npm install`, you can require it from your code with `require('logcad')` or `import logcad from 'logcad'` in your code.
+    - Add `logcad` as a devDependency and don't forget to add it in your `package.json` dependencies.
+    - Use: 
+      ```javascript
+      import * as logcad from 'logcad';`
 
 **🛑 Requirements**: \
 Node.js for local builds; runs in modern browsers that provide `console`, `localStorage`, and `CustomEvent`.
@@ -125,6 +131,3 @@ Node.js for local builds; runs in modern browsers that provide `console`, `local
   // read debug log
   logdrl({ name: 'server', logname: 'server' });
   ```
-## **License**
-
-**MIT** — See `LICENSE` file in the repository.
