@@ -201,13 +201,14 @@ release:gitlab:
       artifacts: false
     - job: build
       artifacts: true # Required to import PROJECT_VERSION from build.env
+  before_script: [] # This prevents the global script (which causes the "unexpected redirection" error) from running.
   script:
     - echo "🚀 Generating release metadata for version $PROJECT_VERSION..."
   only:
-    - tags
+    - /^v?\d+\.\d+\.\d+$/ # Matches v1.0.0 or 1.0.0 format
   release:
     name: 'Release ${PROJECT_NAME} v${PROJECT_VERSION}'
-    tag_name: '$CI_COMMIT_TAG'
+    tag_name: '${PROJECT_VERSION}'
     description: |
       Automated release for version $PROJECT_VERSION
 
