@@ -1,7 +1,7 @@
 image: node:${NODE_VERSION}
 
 variables:
-  NODE_VERSION: 'node:25.2.1-slim'
+  NODE_VERSION: '25.2.1-slim'
   NPM_CONFIG_CACHE: '$CI_PROJECT_DIR/.npm'
   NPM_CONFIG_PRODUCTION: 'false'
 
