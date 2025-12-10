@@ -50,7 +50,8 @@
     "dist",
     "src",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "package.json"
   ],
   "devDependencies": {
     "eslint": "^9.17.0",
