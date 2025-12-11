@@ -214,6 +214,32 @@ publish:jsr:auto:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
       when: always
 
+release:generate:commit:notes:
+  stage: release
+  image: sgkens/phellams-automator:2.5.1
+  needs:
+    - job: deploy:generic
+      artifacts: false
+    - job: build
+      artifacts: true
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
+      when: always
+  artifacts:
+    paths:
+      - dist/release-notes.md
+    expire_in: 1 week
+    reports:
+      # This allows the 'release' section below to access $PROJECT_VERSION
+      dotenv: build.env
+  script:
+    - echo "🟢 Generating release notes for version ${PROJECT_VERSION}..."
+    - pwsh
+    - $Releas_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace staticcanvas
+    - $Releas_notes | Out-File -FilePath dist/release-notes.md -Encoding utf8
+    - echo "✅ Release notes generated at dist/release-notes.md"
+
+
 # ------------------------------------------------------
 # Create GitLab release
 # As Per: https://docs.gitlab.com/user/project/releases/release_cli/
@@ -265,25 +291,25 @@ release:gitlab:
       - https://unpkg.com/browse/${CI_PROJECT_NAME}@${PROJECT_VERSION}/
 
       ## 🌐 jsDelivr CDN
-      - ***ES Module***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js`
-      - ***Universal Module***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js`
-      - ***ES Module Minified***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js`
-      - ***Universal Module Minified***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js`
+      - ***ESM***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js`
+      - ***UMD***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js`
+      - ***ESM Minified***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js`
+      - ***UMD Minified***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js`
 
       ## 📋 Usage
 
       ### UMD (Browser)
       ```html
-      <script src="[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/package/@staticcanvas/logcad/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js"></script>
       ```
 
       ### ESM (Module)
       ```javascript
-      import logcad from '[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
+      import * as logcad from 'https://cdn.jsdelivr.net/npm/package/@staticcanvas/logcad/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad+esm';
       
       // or
       
-      import { logcad } from '[https://cdn.jsdelivr.net/npm/$](https://cdn.jsdelivr.net/npm/$){CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js';
+      import { logcad } from 'https://cdn.jsdelivr.net/npm/package/@staticcanvas/logcad/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js';
       ```
   artifacts: # Required to import PROJECT_VERSION from build.env  script:
     reports:
