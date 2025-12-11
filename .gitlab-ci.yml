@@ -228,17 +228,17 @@ release:generate:commit:notes:
       when: always
   artifacts:
     paths:
-      - dist/release-notes.md
+      - dist/logcad/release-notes.md
     expire_in: 1 week
     reports:
       # This allows the 'release' section below to access $PROJECT_VERSION
       dotenv: build.env
   script:
-    - echo "🟢 Generating release notes for version ${PROJECT_VERSION}..."
     - pwsh
-    - $Releas_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace ${CI_PROJECT_NAME} -Version ${PROJECT_VERSION} -GitlabApiUrl $env:CI_API_V4_URL -ProjectId $env:CI_PROJECT_ID
-    - $Releas_notes | Out-File -FilePath dist/release-notes.md -Encoding utf8
-    - echo "✅ Release notes generated at dist/release-notes.md"
+    - write-host "🟢 Generating release notes for version ${PROJECT_VERSION}..."
+    - $Release_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace ${CI_PROJECT_NAME} -Version ${PROJECT_VERSION} -GitlabApiUrl $env:CI_API_V4_URL -ProjectId $env:CI_PROJECT_ID
+    - $Release_notes | Out-File -FilePath dist/logcad/release-notes.md -Encoding utf8
+    - write-host "✅ Release notes generated at dist/logcad/release-notes.md"
 
 # ------------------------------------------------------
 # generate generic package download links
