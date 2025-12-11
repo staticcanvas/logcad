@@ -110,8 +110,9 @@ deploy:generic:
              "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/${FILE}"
       done
     - echo "✅ All artifacts uploaded to Generic Registry"
-  only:
-    - /^v?\d+\.\d+\.\d+.*$/ # Only publish semantic version tags
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
+      when: always
   artifacts:
     reports:
       # This allows the 'release' section below to access $PROJECT_VERSION
@@ -145,8 +146,9 @@ deploy:npm:
     - npm whoami
     - npm publish --access public
     - echo "✅ Published to npm!"
-  only:
-    - /^v?\d+\.\d+\.\d+.*$/ # Only publish semantic version tags
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
+      when: always
   when: manual
   environment:
     name: npm
@@ -181,8 +183,9 @@ deploy:npm:auto:
     - npm ci
     - npm publish --access public
     - echo "✅ Published to npm!"
-  only:
-    - /^v?\d+\.\d+\.\d+$/ # Matches v1.0.0 or 1.0.0 format
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
+      when: always
   when: on_success
   environment:
     name: npm
@@ -207,8 +210,9 @@ publish:jsr:auto:
     - |
       cd ./dist/logcad
       npx jsr publish --token ${JSR_API_KEY} --allow-dirty
-  only:
-    - /^v?\d+\.\d+\.\d+.*$/
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
+      when: always
 
 # ------------------------------------------------------
 # Create GitLab release
@@ -217,21 +221,17 @@ publish:jsr:auto:
 # ------------------------------------------------------
 release:gitlab:
   stage: release
-  image: debian:bookworm-slim
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
   needs:
     - job: deploy:generic
       artifacts: false
     - job: build
-      artifacts: true # Required to import PROJECT_VERSION from build.env
-  before_script:
-    - echo "🔵 Preparing release publish..."
-    - apt-get update && apt-get install -y curl ca-certificates
-    - curl --location --output /usr/local/bin/release-cli "https://release-cli-downloads.s3.amazonaws.com/latest/release-cli-linux-amd64"
-    - chmod +x /usr/local/bin/release-cli
+      artifacts: true # Required to import PROJECT_VERSION from build.env  script:
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
+      when: always
   script:
-    - echo "🚀 Generating release metadata for version $PROJECT_VERSION..."
-  only:
-    - /^v?\d+\.\d+\.\d+.*$/ # Only publish semantic version tags
+    - echo "🟢 Creating GitLab release for version ${PROJECT_VERSION}..."
   release:
     name: 'Release ${PROJECT_NAME} v${PROJECT_VERSION}'
     tag_name: '${PROJECT_VERSION}'
@@ -252,11 +252,14 @@ release:gitlab:
           url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js'
         - name: 'logcad.min.js.map'
           url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/logcad.min.js.map'
-    description: |
+    description: |  
       # 📦 Version ${PROJECT_VERSION} Release
 
       ## NPM Package
       - https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}
+      - https://www.npmjs.com/package/${CI_PROJECT_NAME}/v/${PROJECT_VERSION}
+      - https://www.jsr.io/npm/${CI_PROJECT_NAME}/v/${PROJECT_VERSION}
+      - https://unpkg.com/browse/${CI_PROJECT_NAME}@${PROJECT_VERSION}/
 
       ## 🌐 jsDelivr CDN
       - ***ES Module***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js`
