@@ -123,7 +123,7 @@ deploy:generic:
 # > to bypass npm 2FA for automated releases
 # > use https://docs.npmjs.com/trusted-publishers
 # ------------------------------------------------------
-deploy:npm:
+deploy:npm:manual:
   stage: deploy
   needs:
     - job: build
@@ -221,7 +221,7 @@ publish:jsr:auto:
     - job: build
       artifacts: true
   before_script:
-    - echo "🔵 Preparing JSR publish...
+    - echo "🔵 Preparing JSR publish..."
     # check to see if JSR package exists
     - |
       cd dist/logcad
@@ -252,6 +252,8 @@ release:generate:commit:notes:
       artifacts: false
     - job: build
       artifacts: true
+    - job: deploy:npm
+      artifacts: false
   rules:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
       when: always
@@ -280,6 +282,8 @@ release:generate:generic:links:
       artifacts: false
     - job: build
       artifacts: true
+    - job: deploy:npm
+      artifacts: false
   before_script:
     - echo "🔵 Preparing release notes generation..."
     - git clone https://gitlab.com/phellams/automator-devops.git
@@ -338,6 +342,8 @@ release:gitlab:
       artifacts: false
     - job: build
       artifacts: true
+    - job: deploy:npm
+      artifacts: false
   rules:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
       when: always  
@@ -347,7 +353,7 @@ release:gitlab:
     - apk add --no-cache jq
   script:
     - echo "🟢 Creating GitLab release for version ${PROJECT_VERSION}..."
-    - RELEASE_NOTES=$(cat dist/release-notes.md)
+    - RELEASE_NOTES=$(cat dist/logcad/release-notes.md)
   release:
     name: 'Release ${PROJECT_NAME} v${PROJECT_VERSION}'
     tag_name: '${PROJECT_VERSION}'
