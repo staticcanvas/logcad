@@ -241,40 +241,40 @@ publish:jsr:auto:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
       when: always
 
-# ------------------------------------------------------
-# Generate release notes
-# ------------------------------------------------------
-release:generate:commit:notes:
-  stage: release
-  image: sgkens/phellams-automator:2.5.1
-  needs:
-    - job: deploy:generic
-      artifacts: false
-    - job: build
-      artifacts: true
-    - job: deploy:npm:auto
-      artifacts: false
-  rules:
-    - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
-      when: always
-  artifacts:
-    paths:
-      - dist/logcad/release-notes.md
-    expire_in: 1 week
-    reports:
-      # This allows the 'release' section below to access $PROJECT_VERSION
-      dotenv: build.env
-  script:
-    - pwsh
-    - write-host "🟢 Generating release notes for version ${PROJECT_VERSION}..."
-    - $Release_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace ${CI_PROJECT_NAME} -Version ${PROJECT_VERSION} -GitlabApiUrl $env:CI_API_V4_URL -ProjectId $env:CI_PROJECT_ID
-    - $Release_notes | Out-File -FilePath dist/logcad/release-notes.md -Encoding utf8
-    - write-host "✅ Release notes generated at dist/logcad/release-notes.md"
+# # ------------------------------------------------------
+# # Generate release notes
+# # ------------------------------------------------------
+# release:generate:commit:notes:
+#   stage: release
+#   image: sgkens/phellams-automator:2.5.1
+#   needs:
+#     - job: deploy:generic
+#       artifacts: false
+#     - job: build
+#       artifacts: true
+#     - job: deploy:npm:auto
+#       artifacts: false
+#   rules:
+#     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
+#       when: always
+#   artifacts:
+#     paths:
+#       - dist/${CI_PROJECT_NAME}/release-notes.md
+#     expire_in: 1 week
+#     reports:
+#       # This allows the 'release' section below to access $PROJECT_VERSION
+#       dotenv: build.env
+#   script:
+#     - pwsh
+#     - write-host "🟢 Generating release notes for version ${PROJECT_VERSION}..."
+#     - $Release_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace ${CI_PROJECT_NAME} -Version ${PROJECT_VERSION} -GitlabApiUrl $env:CI_API_V4_URL -ProjectId $env:CI_PROJECT_ID
+#     - $Release_notes | Out-File -FilePath dist/${CI_PROJECT_NAME}/release-notes.md -Encoding utf8
+#     - write-host "✅ Release notes generated at dist/${CI_PROJECT_NAME}/release-notes.md"
 
 # ------------------------------------------------------
 # generate generic package download links
 # using phelleams-automtor
-release:generate:generic:links:
+release:generate:generic:release:meta:
   stage: release
   image: sgkens/phellams-automator:2.5.1
   needs:
@@ -291,11 +291,14 @@ release:generate:generic:links:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
       when: always
   script:
-    - echo "🟢 Generating Generic Package Registry download links for version ${PROJECT_VERSION}..."
-    - | 
+    - |
        pwsh
+       
+       write-host "🟢 Generating Generic Package Registry download links for version ${PROJECT_VERSION}..."
+       
        using module ./automator-devops/scripts/core/Request-GenericPackage.psm1
        using module ./automator-devops/scripts/core/Get-RemoteFileHash.psm1
+       
        $links = Get-GenericPackageLinks -ProjectId $env:CI_PROJECT_ID -ProjectName $env:CI_PROJECT_NAME -Version $env:PROJECT_VERSION -GitlabApiUrl $env:CI_API_V4_URL
        $ESM = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.esm.js'} | Sort-Object created_at -Descending)[0]
        $ESMMap = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.esm.js.map'} | Sort-Object created_at -Descending)[0]
@@ -305,14 +308,20 @@ release:generate:generic:links:
        $UMDMin = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.min.js'} | Sort-Object created_at -Descending)[0]
        $UMDMap = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.js.map'} | Sort-Object created_at -Descending)[0]
        $UMDMinMap = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.min.js.map'} | Sort-Object created_at -Descending)[0]
+       
        $all_links = $ESM, $ESMMap, $ESMMin, $ESMMinMap, $UMD, $UMDMin, $UMDMap, $UMDMinMap
-       $all_links | convertto-json -depth 2 | Out-File -FilePath dist/logcad/generic-package-links.json -Encoding utf8
-    - echo "✅ Generic Package Registry download links generated."
-    - echo "🟢 Generic Package Checksums"
-    - |
-       pwsh
-       $all_links | select-object file_name, checksum | convertto-json -depth 2 | Out-File -FilePath dist/logcad/generic-package-checksums.json -Encoding utf8
-    - echo "✅ Finished generating Generic Package Registry checksums."
+       $all_links | convertto-json -depth 2 | Out-File -FilePath dist/${CI_PROJECT_NAME}/generic-package-links.json -Encoding utf8
+       write-host "✅ Generic Package Registry download links generated."
+       
+       write-host "🟢 Generic Package Checksums"
+       $all_links | select-object file_name, checksum | convertto-json -depth 2 | Out-File -FilePath dist/${CI_PROJECT_NAME}/generic-package-checksums.json -Encoding utf8
+       write-host "✅ Finished generating Generic Package Registry checksums."
+       
+       write-host "🟢 Generating release notes for version ${PROJECT_VERSION}..."
+       $Release_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace ${CI_PROJECT_NAME} -Version ${PROJECT_VERSION} -GitlabApiUrl $env:CI_API_V4_URL -ProjectId $env:CI_PROJECT_ID
+       $Release_notes | Out-File -FilePath dist/${CI_PROJECT_NAME}/release-notes.md -Encoding utf8
+       
+       write-host "✅ Release notes generated at dist/${CI_PROJECT_NAME}/release-notes.md"
     - |
       bash
       curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
@@ -321,6 +330,7 @@ release:generate:generic:links:
       curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
       --upload-file "generic-package-checksums.json" \
       "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/generic-package-links.json"
+
   artifacts:
     reports:
       # This allows the 'release' section below to access $PROJECT_VERSION
@@ -328,6 +338,7 @@ release:generate:generic:links:
     paths:
       - dist/logcad/generic-package-links.json
       - dist/logcad/generic-package-checksums.json
+      - dist/logcad/release-notes.md
 
 # ------------------------------------------------------
 # Create GitLab release
@@ -353,7 +364,7 @@ release:gitlab:
     - apk add --no-cache jq
   script:
     - echo "🟢 Creating GitLab release for version ${PROJECT_VERSION}..."
-    - RELEASE_NOTES=$(cat dist/logcad/release-notes.md)
+    - RELEASE_NOTES=$(cat dist/${CI_PROJECT_NAME}/release-notes.md)
   release:
     name: 'Release ${PROJECT_NAME} v${PROJECT_VERSION}'
     tag_name: '${PROJECT_VERSION}'
