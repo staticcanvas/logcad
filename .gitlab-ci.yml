@@ -319,7 +319,7 @@ release:generate:generic:release:meta:
        $Release_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace ${CI_PROJECT_NAME} -Version ${PROJECT_VERSION} -GitlabApiUrl $env:CI_API_V4_URL -ProjectId $env:CI_PROJECT_ID
        $Release_notes | Out-File -FilePath dist/${CI_PROJECT_NAME}/release-notes.md -Encoding utf8
        
-       write-host "✅ Release notes generated at dist/${CI_PROJECT_NAME}/release-notes.md"
+    - write-host "✅ Release notes generated at dist/${CI_PROJECT_NAME}/release-notes.md"
     - |
       bash
       curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
@@ -328,6 +328,7 @@ release:generate:generic:release:meta:
       curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
       --upload-file "generic-package-checksums.json" \
       "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/generic-package-links.json"
+    - echo "✅ Uploaded generic-package-links.json and generic-package-checksums.json to Generic Package Registry"
 
   artifacts:
     reports:
