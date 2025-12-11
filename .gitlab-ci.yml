@@ -292,13 +292,11 @@ release:generate:generic:release:meta:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
       when: always
   script:
+    - pwsh
     - |
-       pwsh 
        write-host "🟢 Generating Generic Package Registry download links for version ${PROJECT_VERSION}..."
-       
        using module ./automator-devops/scripts/core/Request-GenericPackage.psm1
        using module ./automator-devops/scripts/core/Get-RemoteFileHash.psm1
-       
        $links = Get-GenericPackageLinks -ProjectId $env:CI_PROJECT_ID -ProjectName $env:CI_PROJECT_NAME -Version $env:PROJECT_VERSION -GitlabApiUrl $env:CI_API_V4_URL
        $ESM = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.esm.js'} | Sort-Object created_at -Descending)[0]
        $ESMMap = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.esm.js.map'} | Sort-Object created_at -Descending)[0]
