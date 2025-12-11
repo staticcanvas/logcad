@@ -135,6 +135,15 @@ deploy:npm:
       aud: sigstore
   before_script:
     - echo "🔵 Preparing npm publish..."
+    # check to see if npm package exists
+    - |
+      cd dist/logcad
+      if npm view . >/dev/null 2>&1; then
+        echo "ℹ️ npm package already exists. Skipping publish."
+        exit 0
+      else
+        echo "ℹ️ npm package does not exist. Proceeding with publish."
+      fi
   script:
     - echo "🟢 Publishing to npm..."
     - |
@@ -173,6 +182,15 @@ deploy:npm:auto:
       aud: sigstore
   before_script:
     - echo "🔵 Preparing npm publish..."
+    # check to see if npm package exists
+    - |
+      cd dist/logcad
+      if npm view . >/dev/null 2>&1; then
+        echo "ℹ️ npm package already exists. Skipping publish."
+        exit 0
+      else
+        echo "ℹ️ npm package does not exist. Proceeding with publish."
+      fi
   script:
     - echo "🟢 Auto-publishing to npm..."
     - |
@@ -202,6 +220,17 @@ publish:jsr:auto:
   needs:
     - job: build
       artifacts: true
+  before_script:
+    - echo "🔵 Preparing JSR publish...
+    # check to see if JSR package exists
+    - |
+      cd dist/logcad
+      if npx jsr view @${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME} >/dev/null 2>&1; then
+        echo "ℹ️ JSR package already exists. Skipping publish."
+        exit 0
+      else
+        echo "ℹ️ JSR package does not exist. Proceeding with publish."
+      fi
   script:
     # npx jsr publish automatically detects the token above
     - echo "🟢 Auto-publishing to JSR..."
@@ -352,25 +381,25 @@ release:gitlab:
 
       ### ▪️ NPM Registry
 
-      * https://www.npmjs.com/package/@staticcanvas/${CI_PROJECT_NAME}/v/${PROJECT_VERSION}
+      * https://www.npmjs.com/package/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/v/${PROJECT_VERSION}
 
       ### ▪️ JSR (JavaScript Registry)
 
-      * https://www.jsr.io/npm/@staticcanvas/${CI_PROJECT_NAME}/v/${PROJECT_VERSION}
+      * https://www.jsr.io/npm/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/v/${PROJECT_VERSION}
 
       ### ▪️ Unpkg CDN
       
-      * ***ESM***: https://unpkg.com/@staticcanvas/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js
-      * ***UMD***: https://unpkg.com/@staticcanvas/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js
-      - ***ESM Minified***: https://unpkg.com/@staticcanvas/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js
-      - ***UMD Minified***: https://unpkg.com/@staticcanvas/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js
+      * ***ESM***: https://unpkg.com/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js
+      * ***UMD***: https://unpkg.com/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js
+      - ***ESM Minified***: https://unpkg.com/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js
+      - ***UMD Minified***: https://unpkg.com/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js
 
       ### ▪️ jsDelivr CDN
 
-      - ***ESM***: `https://cdn.jsdelivr.net/npm/@staticcanvas/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js`
-      - ***UMD***: `https://cdn.jsdelivr.net/npm/@staticcanvas/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js`
-      - ***ESM Minified***: `https://cdn.jsdelivr.net/npm/@staticcanvas/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js`
-      - ***UMD Minified***: `https://cdn.jsdelivr.net/npm/@staticcanvas/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js`
+      - ***ESM***: `https://cdn.jsdelivr.net/npm/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js`
+      - ***UMD***: `https://cdn.jsdelivr.net/npm/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js`
+      - ***ESM Minified***: `https://cdn.jsdelivr.net/npm/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js`
+      - ***UMD Minified***: `https://cdn.jsdelivr.net/npm/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js`
 
       ## Usage
 
@@ -379,7 +408,7 @@ release:gitlab:
       UMD will auto-load `${CI_PROJECT_NAME}` into the global scope `window.*`
 
       ```html
-      <script src="https://cdn.jsdelivr.net/npm/package/@staticcanvas/logcad/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/package/@${CI_PROJECT_NAMESPACE}/logcad/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js"></script>
       ```
 
       ### ESM (Module)
@@ -387,7 +416,7 @@ release:gitlab:
       ESM can be imported into your JavaScript/TypeScript projects as follows:
 
       ```javascript
-      import * as logcad from 'https://cdn.jsdelivr.net/npm/package/@staticcanvas/logcad/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad+esm';
+      import * as logcad from 'https://cdn.jsdelivr.net/npm/package/@${CI_PROJECT_NAMESPACE}/logcad/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad+esm';
       ```
   artifacts: # Required to import PROJECT_VERSION from build.env  script:
     reports:
