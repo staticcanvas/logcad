@@ -285,15 +285,15 @@ release:generate:generic:release:meta:
     - job: deploy:npm:auto
       artifacts: false
   before_script:
-    - echo "🔵 Preparing release notes generation..."
+    - pwsh 
+    - write-host "🔵 Preparing release notes generation..."
     - git clone https://gitlab.com/phellams/automator-devops.git
   rules:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
       when: always
   script:
     - |
-       pwsh
-       
+       pwsh 
        write-host "🟢 Generating Generic Package Registry download links for version ${PROJECT_VERSION}..."
        
        using module ./automator-devops/scripts/core/Request-GenericPackage.psm1
