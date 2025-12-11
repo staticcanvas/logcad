@@ -107,7 +107,7 @@ deploy:generic:
         echo "Uploading $FILE..."
         curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
              --upload-file "$FILE" \
-             "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/logcad/${PROJECT_VERSION}/${FILE}"
+             "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/${FILE}"
       done
     - echo "✅ All artifacts uploaded to Generic Registry"
   rules:
@@ -135,8 +135,6 @@ deploy:npm:
       aud: sigstore
   before_script:
     - echo "🔵 Preparing npm publish..."
-    # - npm ci
-    # - npm run build
   script:
     - echo "🟢 Publishing to npm..."
     - |
@@ -214,6 +212,9 @@ publish:jsr:auto:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
       when: always
 
+# ------------------------------------------------------
+# Generate release notes
+# ------------------------------------------------------
 release:generate:commit:notes:
   stage: release
   image: sgkens/phellams-automator:2.5.1
@@ -235,10 +236,65 @@ release:generate:commit:notes:
   script:
     - echo "🟢 Generating release notes for version ${PROJECT_VERSION}..."
     - pwsh
-    - $Releas_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace staticcanvas
+    - $Releas_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace ${CI_PROJECT_NAME} -Version ${PROJECT_VERSION} -GitlabApiUrl $env:CI_API_V4_URL -ProjectId $env:CI_PROJECT_ID
     - $Releas_notes | Out-File -FilePath dist/release-notes.md -Encoding utf8
     - echo "✅ Release notes generated at dist/release-notes.md"
 
+# ------------------------------------------------------
+# generate generic package download links
+# using phelleams-automtor
+release:generate:generic:links:
+  stage: release
+  image: sgkens/phellams-automator:2.5.1
+  needs:
+    - job: deploy:generic
+      artifacts: false
+    - job: build
+      artifacts: true
+  before_script:
+    - echo "🔵 Preparing release notes generation..."
+    - git clone https://gitlab.com/phellams/automator-devops.git
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
+      when: always
+  script:
+    - echo "🟢 Generating Generic Package Registry download links for version ${PROJECT_VERSION}..."
+    - | 
+       pwsh
+       using module ./automator-devops/scripts/core/Request-GenericPackage.psm1
+       using module ./automator-devops/scripts/core/Get-RemoteFileHash.psm1
+       $links = Get-GenericPackageLinks -ProjectId $env:CI_PROJECT_ID -ProjectName $env:CI_PROJECT_NAME -Version $env:PROJECT_VERSION -GitlabApiUrl $env:CI_API_V4_URL
+       $ESM = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.esm.js'} | Sort-Object created_at -Descending)[0]
+       $ESMMap = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.esm.js.map'} | Sort-Object created_at -Descending)[0]
+       $ESMMin = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.esm.min.js'} | Sort-Object created_at -Descending)[0]
+       $ESMMinMap = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.esm.min.js.map'} | Sort-Object created_at -Descending)[0]
+       $UMD = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.js'} | Sort-Object created_at -Descending)[0]
+       $UMDMin = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.min.js'} | Sort-Object created_at -Descending)[0]
+       $UMDMap = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.js.map'} | Sort-Object created_at -Descending)[0]
+       $UMDMinMap = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.min.js.map'} | Sort-Object created_at -Descending)[0]
+       $all_links = $ESM, $ESMMap, $ESMMin, $ESMMinMap, $UMD, $UMDMin, $UMDMap, $UMDMinMap
+       $all_links | convertto-json -depth 2 | Out-File -FilePath dist/logcad/generic-package-links.json -Encoding utf8
+    - echo "✅ Generic Package Registry download links generated."
+    - echo "🟢 Generic Package Checksums"
+    - |
+       pwsh
+       $all_links | select-object file_name, checksum | convertto-json -depth 2 | Out-File -FilePath dist/logcad/generic-package-checksums.json -Encoding utf8
+    - echo "✅ Finished generating Generic Package Registry checksums."
+    - |
+      bash
+      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+      --upload-file "generic-package-checksums.json" \
+      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/generic-package-checksums.json"
+      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+      --upload-file "generic-package-checksums.json" \
+      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/generic-package-links.json"
+  artifacts:
+    reports:
+      # This allows the 'release' section below to access $PROJECT_VERSION
+      dotenv: build.env
+    paths:
+      - dist/logcad/generic-package-links.json
+      - dist/logcad/generic-package-checksums.json
 
 # ------------------------------------------------------
 # Create GitLab release
@@ -255,12 +311,14 @@ release:gitlab:
       artifacts: true
   rules:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
-      when: always
+      when: always  
 # 🛠️ FIX: Install bash so the runner's scripts don't crash
   before_script:
     - apk add --no-cache bash
+    - apk add --no-cache jq
   script:
     - echo "🟢 Creating GitLab release for version ${PROJECT_VERSION}..."
+    - RELEASE_NOTES=$(cat dist/release-notes.md)
   release:
     name: 'Release ${PROJECT_NAME} v${PROJECT_VERSION}'
     tag_name: '${PROJECT_VERSION}'
@@ -268,48 +326,68 @@ release:gitlab:
     assets:
       links:
         - name: '${PROJECT_NAME}.esm.js'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/logcad.esm.js'
+          url: '$(jq -r ./generic-package-links.json | .[] | select(.file_name=="${PROJECT_NAME}.esm.js") | .url)'
         - name: '${PROJECT_NAME}.esm.js.map'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/logcad.esm.js.map'
+          url: '$(jq -r ./generic-package-links.json | .[] | select(.file_name=="${PROJECT_NAME}.esm.js.map") | .url)'
         - name: '${PROJECT_NAME}.esm.min.js'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/logcad.esm.min.js'
+          url: '$(jq -r ./generic-package-links.json | .[] | select(.file_name=="${PROJECT_NAME}.esm.min.js") | .url)'
         - name: '${PROJECT_NAME}.js'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/logcad.js'
+          url: '$(jq -r ./generic-package-links.json | .[] | select(.file_name=="${PROJECT_NAME}.js") | .url)'
         - name: '${PROJECT_NAME}.js.map'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/logcad.js.map'
+          url: '$(jq -r ./generic-package-links.json | .[] | select(.file_name=="${PROJECT_NAME}.js.map") | .url)'
         - name: '${PROJECT_NAME}.min.js'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/logcad.min.js'
+          url: '$(jq -r ./generic-package-links.json | .[] | select(.file_name=="${PROJECT_NAME}.min.js") | .url)'
         - name: '${PROJECT_NAME}.min.js.map'
-          url: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/logcad.min.js.map'
+          url: '$(jq -r ./generic-package-links.json | .[] | select(.file_name=="${PROJECT_NAME}.min.js.map") | .url)'
+        - name: 'Generic Package Checksums'
+          url: '$(jq -r ./generic-package-links.json | .[] | select(.file_name=="generic-package-links.json") | .url)'
+        - name: 'Release Notes'
+          url: '$(jq -r ./generic-package-checksums.json | .[] | select(.file_name=="generic-package-checksums.json") | .url)'
     description: |  
       # 📦 Version ${PROJECT_VERSION} Release
 
-      ## NPM Package
-      - https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}
-      - https://www.npmjs.com/package/${CI_PROJECT_NAME}/v/${PROJECT_VERSION}
-      - https://www.jsr.io/npm/${CI_PROJECT_NAME}/v/${PROJECT_VERSION}
-      - https://unpkg.com/browse/${CI_PROJECT_NAME}@${PROJECT_VERSION}/
+      ${RELEASE_NOTES}
 
-      ## 🌐 jsDelivr CDN
-      - ***ESM***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js`
-      - ***UMD***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js`
-      - ***ESM Minified***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js`
-      - ***UMD Minified***: `https://cdn.jsdelivr.net/npm/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js`
+      ## **Package Links**
 
-      ## 📋 Usage
+      ### ▪️ NPM Registry
+
+      * https://www.npmjs.com/package/@staticcanvas/${CI_PROJECT_NAME}/v/${PROJECT_VERSION}
+
+      ### ▪️ JSR (JavaScript Registry)
+
+      * https://www.jsr.io/npm/@staticcanvas/${CI_PROJECT_NAME}/v/${PROJECT_VERSION}
+
+      ### ▪️ Unpkg CDN
+      
+      * ***ESM***: https://unpkg.com/@staticcanvas/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js
+      * ***UMD***: https://unpkg.com/@staticcanvas/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js
+      - ***ESM Minified***: https://unpkg.com/@staticcanvas/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js
+      - ***UMD Minified***: https://unpkg.com/@staticcanvas/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js
+
+      ### ▪️ jsDelivr CDN
+
+      - ***ESM***: `https://cdn.jsdelivr.net/npm/@staticcanvas/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js`
+      - ***UMD***: `https://cdn.jsdelivr.net/npm/@staticcanvas/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js`
+      - ***ESM Minified***: `https://cdn.jsdelivr.net/npm/@staticcanvas/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js`
+      - ***UMD Minified***: `https://cdn.jsdelivr.net/npm/@staticcanvas/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js`
+
+      ## Usage
 
       ### UMD (Browser)
+
+      UMD will auto-load `${CI_PROJECT_NAME}` into the global scope `window.*`
+
       ```html
       <script src="https://cdn.jsdelivr.net/npm/package/@staticcanvas/logcad/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js"></script>
       ```
 
       ### ESM (Module)
+
+      ESM can be imported into your JavaScript/TypeScript projects as follows:
+
       ```javascript
       import * as logcad from 'https://cdn.jsdelivr.net/npm/package/@staticcanvas/logcad/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad+esm';
-      
-      // or
-      
-      import { logcad } from 'https://cdn.jsdelivr.net/npm/package/@staticcanvas/logcad/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js';
       ```
   artifacts: # Required to import PROJECT_VERSION from build.env  script:
     reports:
