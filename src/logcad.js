@@ -209,6 +209,7 @@ function logd(name, action, message, args, trace = false) {
 }
 
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * **
+* @function logdrl(filter)
 * @description This function filters the debug log based on the provided filter object.
 * @param {object} filter - The filter object.
 
