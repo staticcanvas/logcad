@@ -164,6 +164,10 @@ export default defineConfig({
         },
         // copy source files to dist
         { src: 'src', dest: `dist/${pkg_name_WNNS}` },
+        // copy package-lock.json to dist for npm ci installs
+        { src: 'package-lock.json', dest: `dist/${pkg_name_WNNS}` },
+        // copy jsr.jsonc to dist for jsr publishing
+        { src: 'jsr.jsonc', dest: `dist/${pkg_name_WNNS}` },
       ],
       hook: 'writeBundle', // Run after build finishes
     }),

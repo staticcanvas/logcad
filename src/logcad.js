@@ -109,6 +109,7 @@ function logc(objectArray) {
  */
 
 function logd(name, action, message, args, trace = false) {
+
   if (args === null) {
     args = '';
   } else {
@@ -118,7 +119,7 @@ function logd(name, action, message, args, trace = false) {
   // check name object and set defaults
   // TODO: add styling for message color and action
   // TODO: add styling for json!optional and args
-  // NOTE: keep or removde stack trace as from within console. line number is provide by console output
+  // NOTE: keep or remove stack trace as from within console. line number is provide by console output
   if (!name.name) {
     name.name = 'logd';
   }
@@ -208,6 +209,7 @@ function logd(name, action, message, args, trace = false) {
 }
 
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * **
+* @function logdrl(filter)
 * @description This function filters the debug log based on the provided filter object.
 * @param {object} filter - The filter object.
 
@@ -281,4 +283,8 @@ if (typeof window !== 'undefined') {
 }
 
 // Export it using ES6 syntax for default export
-export default { logc, logd, logdrl };
+export default { 
+  logc, 
+  logd, 
+  logdrl 
+};
