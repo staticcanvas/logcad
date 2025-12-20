@@ -108,6 +108,10 @@ deploy:generic:
         curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file "$FILE" \
              "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${CI_PROJECT_NAME}/${PROJECT_VERSION}/${FILENAME}"
         echo "\n ✅ Uploaded '$FILENAME'\n"
+        if [ $? -ne 0 ]; then
+          echo "❌ Failed to upload '$FILENAME'. Exiting."
+          exit 1
+        fi
       done
     - echo "✅ All artifacts uploaded to Generic Registry \n"
   rules:
