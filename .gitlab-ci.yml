@@ -361,7 +361,7 @@ generate:generic:release:metadata:
       
       # Generate Release Notes
       Write-Host "🟢 Generating release notes for version $env:PROJECT_VERSION..."
-      $Release_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace $env:CI_PROJECT_NAME
+      $Release_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace $env:CI_PROJECT_NAMESPACE
       $Release_notes | Out-File -FilePath "$OutputDir/release-notes.md" -Encoding utf8
       Write-Host "✅ Release notes generated at $OutputDir/release-notes.md"
       
