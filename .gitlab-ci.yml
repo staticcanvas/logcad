@@ -364,11 +364,11 @@ release:generate:generic:release:metadata:
       
       curl --fail --header "JOB-TOKEN: $CI_JOB_TOKEN" \
       --upload-file "generic-package-checksums.json" \
-      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/generic-package-checksums.json"
+      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${CI_PROJECT_NAME}/${PROJECT_VERSION}/generic-package-checksums"
       
       curl --fail --header "JOB-TOKEN: $CI_JOB_TOKEN" \
       --upload-file "generic-package-links.json" \
-      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/generic-package-links.json"
+      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${CI_PROJECT_NAME}/${PROJECT_VERSION}/generic-package-links"
       
       echo "✅ Upload complete."
 
