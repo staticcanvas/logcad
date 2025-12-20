@@ -303,7 +303,7 @@ release:generate:generic:release:metadata:
       # Import Modules
       using module ./automator-devops/scripts/core/Request-GenericPackage.psm1
       using module ./automator-devops/scripts/core/Get-RemoteFileHash.psm1
-      using module ./automator-devops/scripts/release/Get-ReleaseNotes.psm1
+      using module ./automator-devops/scripts/core/Get-ReleaseNotes.psm1
 
       Write-Host "🟢 Generating Generic Package Registry download links for version $env:PROJECT_VERSION..."
             
