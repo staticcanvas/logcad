@@ -453,7 +453,7 @@ release:gitlab:
       # 2. Iterate over the JSON file and build the CLI flags dynamically
       while IFS= read -r item; do
         NAME=$(echo "$item" | jq -r '.file_name')
-        URL=$(echo "$item" | jq -r '.url')
+        URL=$(echo "$item" | jq -r '.download_url')
         echo "🔹 Found asset: $NAME"
         ASSET_FLAGS="$ASSET_FLAGS --assets-link {\"name\":\"$NAME\",\"url\":\"$URL\"}"
       done < <(jq -c '.[]' ./dist/${CI_PROJECT_NAME}/generic-package-links.json)
