@@ -281,9 +281,11 @@ release:generate:generic:release:metadata:
       artifacts: false
   
   before_script:
-    # 1. Use standard echo (Bash) or pwsh -c for logging here
     - echo "🔵 Preparing release notes generation..."
+    # pull in automator scripts
     - git clone https://gitlab.com/phellams/automator-devops.git
+    # fetch full git history for accurate release notes
+    - git fetch --unshallow
 
   rules:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
@@ -312,7 +314,7 @@ release:generate:generic:release:metadata:
       }
 
       # Fetch Links
-      $links = Request-GenericPackage -ProjectId $env:CI_PROJECT_ID -ProjectName $env:CI_PROJECT_NAME -PackageVersion $env:PROJECT_VERSION -GitlabApiUrl $env:CI_API_V4_URL
+      $links = Request-GenericPackage -ProjectId $env:CI_PROJECT_ID -ProjectName $env:CI_PROJECT_NAME -Namespace $env:CI_PROJECT_NAMESPACE -PackageVersion $env:PROJECT_VERSION -ApiKey $env:CI_JOB_TOKEN -ApiUrl $env:CI_API_V4_URL -ci
       
       # Filter Links (Using $env:PROJECT_NAME instead of Bash syntax)
       $ESM       = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.esm.js" }       | Sort-Object created_at -Descending | Select-Object -First 1
