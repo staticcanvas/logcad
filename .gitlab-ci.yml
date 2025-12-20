@@ -322,6 +322,9 @@ generate:generic:release:metadata:
       }
       $links = Request-GenericPackage @params
 
+      # 🔍 DEBUG: Print the count to the logs so we know if it worked
+      Write-Host "🔹 Found $($links.Count) matching files."
+
       # 2. Define the extensions you want to capture
       $suffixes = @(
           '.esm.js', '.esm.js.map', 
@@ -332,7 +335,7 @@ generate:generic:release:metadata:
 
       # 3. Filter and Select (Loop logic)
       $all_links = $suffixes | ForEach-Object {
-          $targetFile = "$env:PROJECT_NAME$_"
+          $targetFile = "$env:CI_PROJECT_NAME$_"
           
           # Find the file, sort by newest, take the first one
           $links | Where-Object { $_.file_name -eq $targetFile } | 
@@ -371,7 +374,7 @@ generate:generic:release:metadata:
       $Release_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace $env:CI_PROJECT_NAMESPACE
       $Release_notes | Out-File -FilePath "$OutputDir/release-notes.md" -Encoding utf8
       Write-Host "✅ Release notes generated at $OutputDir/release-notes.md"
-      
+
       EOF
 
     # ---------------------------------------------------------
@@ -460,7 +463,7 @@ release:gitlab:
       # 3. Create the description string
       # IMPORTANT: EOF must NOT be quoted so that variables like ${PROJECT_VERSION} expand.
       DESCRIPTION=$(cat <<EOF
-      # 📦 ${PROJECT_NAME} ${PROJECT_VERSION} Release
+      # <img src="https://raw.githubusercontent.com/staticcanvas/general-resources/main/logos/logcad/dist/png/logcad-128x128.png" width="64" > ${PROJECT_NAME} ${PROJECT_VERSION} Release
 
       ${RELEASE_NOTES}
 
