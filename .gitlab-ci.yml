@@ -373,22 +373,30 @@ generate:generic:release:metadata:
     # ---------------------------------------------------------
     - pwsh ./generate_meta.ps1
 
-    # ---------------------------------------------------------
+# ---------------------------------------------------------
     # STEP 3: Upload (Bash)
-    # We must point to the correct path in dist/
     # ---------------------------------------------------------
     - |
       echo "🟢 Uploading metadata to Generic Registry..."
-      cd "dist/${CI_PROJECT_NAME}"
       
-      curl --fail --header "JOB-TOKEN: $CI_JOB_TOKEN" \
-      --upload-file "./generic-package-checksums.json" \
-      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${CI_PROJECT_NAME}/${PROJECT_VERSION}/generic-package-checksums.json"
-      
-      curl --fail --header "JOB-TOKEN: $CI_JOB_TOKEN" \
-      --upload-file "./generic-package-links.json" \
-      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${CI_PROJECT_NAME}/${PROJECT_VERSION}/generic-package-links.json"
-      
+      # Safety check: Ensure directory exists
+      cd "dist/${CI_PROJECT_NAME}" || { echo "❌ Directory not found"; exit 1; }
+
+      # Define the files you want to upload
+      FILES="generic-package-checksums.json generic-package-links.json"
+
+      for FILE in $FILES; do
+        if [ -f "$FILE" ]; then
+          echo "🔹 Uploading $FILE..."
+          
+          curl --fail --silent --show-error --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+            --upload-file "$FILE" \
+            "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${CI_PROJECT_NAME}/${PROJECT_VERSION}/${FILE}"
+        else
+          echo "⚠️ Warning: '$FILE' not found in $(pwd), skipping."
+        fi
+      done
+
       echo "✅ Upload complete."
 
   artifacts:
