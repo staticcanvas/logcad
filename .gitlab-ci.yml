@@ -312,12 +312,6 @@ generate:generic:release:metadata:
       using module ./automator-devops/scripts/core/Get-ReleaseNotes.psm1
 
       Write-Host "🟢 Generating Generic Package Registry download links for version $env:PROJECT_VERSION..."
-            
-      # Ensure Output Directory Exists
-      $OutputDir = "dist/$env:CI_PROJECT_NAME"
-      if (!(Test-Path -Path $OutputDir)) {
-          New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
-      }
 
       # 1. Fetch Links (Use Splatting for readability)
       $params = @{
@@ -351,20 +345,20 @@ generate:generic:release:metadata:
       }
 
       # 4. Export JSON
-      $all_links | ConvertTo-Json -Depth 5 | Out-File -FilePath "$OutputDir/generic-package-links.json" -Encoding utf8
+      $all_links | ConvertTo-Json -Depth 5 | Out-File -FilePath "dist/${CI_PROJECT_NAME}/generic-package-links.json" -Encoding utf8
       
       Write-Host "✅ Generic Package Registry download links generated."
       
       # Create Checksums
       Write-Host "🟢 Generic Package Checksums"
-      $all_links | Select-Object file_name, checksum | ConvertTo-Json -Depth 2 | Out-File -FilePath "$OutputDir/generic-package-checksums.json" -Encoding utf8
-      Write-Host "✅ Finished generating Generic Package Registry checksums."
+      $all_links | Select-Object file_name, checksum | ConvertTo-Json -Depth 2 | Out-File -FilePath "dist/${CI_PROJECT_NAME}/generic-package-checksums.json" -Encoding utf8
+      Write-Host "✅ Generic Package Registry checksums generated."
       
       # Generate Release Notes
       Write-Host "🟢 Generating release notes for version $env:PROJECT_VERSION..."
       $Release_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace $env:CI_PROJECT_NAMESPACE
-      $Release_notes | Out-File -FilePath "$OutputDir/release-notes.md" -Encoding utf8
-      Write-Host "✅ Release notes generated at $OutputDir/release-notes.md"
+      $Release_notes | Out-File -FilePath "dist/${CI_PROJECT_NAME}/release-notes.md" -Encoding utf8
+      Write-Host "✅ Release notes generated at dist/${CI_PROJECT_NAME}/release-notes.md"
       
       EOF
 
@@ -373,7 +367,7 @@ generate:generic:release:metadata:
     # ---------------------------------------------------------
     - pwsh ./generate_meta.ps1
 
-# ---------------------------------------------------------
+    # ---------------------------------------------------------
     # STEP 3: Upload (Bash)
     # ---------------------------------------------------------
     - |
