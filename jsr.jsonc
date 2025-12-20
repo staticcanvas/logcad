@@ -7,7 +7,7 @@
     // The name must be scoped with an '@' (e.g. @username/pkgname)
     "name": "@staticcanvas/logcad",
     // Must be a valid SemVer version (e.g. 0.1.0, 1.0.0-rc.1)
-    "version": "0.4.20",
+    "version": "0.4.23",
     // ---------------------------------------------------------
     // EXPORTS
     // ---------------------------------------------------------
@@ -54,6 +54,12 @@
         "dev": "deno run --watch mod.ts"
     }
 }
+
+
+
+
+
+
 
 
 

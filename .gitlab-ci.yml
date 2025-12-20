@@ -117,9 +117,9 @@ deploy:generic:
   rules:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
       when: always
-  artifacts:
-    reports:
-      dotenv: build.env
+  environment:
+    name: Generic
+    url: https://gitlab.com/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/-/packages/generic/${CI_PROJECT_NAME}/${PROJECT_VERSION}
 
 # ------------------------------------------------------
 # Deploy to npm (triggers jsDelivr automatically)
@@ -161,9 +161,6 @@ deploy:npm:manual:
   environment:
     name: npm
     url: https://www.npmjs.com/package/${CI_PROJECT_NAME}
-  artifacts:
-    reports:
-      dotenv: build.env
 
 # ------------------------------------------------------
 # Auto-deploy on version tags (v1.0.0, 1.0.0, etc.)
@@ -208,9 +205,6 @@ deploy:npm:auto:
   environment:
     name: npm
     url: https://www.npmjs.com/package/${CI_PROJECT_NAME}
-  artifacts:
-    reports:
-      dotenv: build.env
       
 # ------------------------------------------------------
 # Publish to JSR (JavaScript Registry) for supply chain security
@@ -243,6 +237,9 @@ publish:jsr:auto:
   rules:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
       when: always
+  environment:
+    name: JSR
+    url: https://www.jsr.io/npm/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/v/${PACKAGE_VERSION}
 
 # # ------------------------------------------------------
 # # Generate release notes
@@ -291,7 +288,6 @@ generate:generic:release:metadata:
     - git clone https://gitlab.com/phellams/automator-devops.git
     # fetch full git history for accurate release notes
     - git fetch --unshallow
-
   rules:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
       when: always
@@ -312,12 +308,6 @@ generate:generic:release:metadata:
       using module ./automator-devops/scripts/core/Get-ReleaseNotes.psm1
 
       Write-Host "🟢 Generating Generic Package Registry download links for version $env:PROJECT_VERSION..."
-            
-      # Ensure Output Directory Exists
-      $OutputDir = "dist/$env:CI_PROJECT_NAME"
-      if (!(Test-Path -Path $OutputDir)) {
-          New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
-      }
 
       # 1. Fetch Links (Use Splatting for readability)
       $params = @{
@@ -350,18 +340,34 @@ generate:generic:release:metadata:
                   Select-Object -First 1
       }
 
+      # 🔍 DEBUG: Print the count to the logs so we know if it worked
+      Write-Host "🔹 Found $($all_links.Count) matching files."
+
       # 4. Export JSON
-      $all_links | ConvertTo-Json -Depth 5 | Out-File -FilePath "$OutputDir/generic-package-links.json" -Encoding utf8
+      $OutputDir = "dist/$env:CI_PROJECT_NAME"
+      New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
       
-      Write-Host "✅ Generic Package Registry download links generated."
+      if ($all_links.Count -gt 0) {
+        $all_links | ConvertTo-Json -Depth 5 | Out-File -FilePath "$OutputDir/generic-package-links.json"
+        
+        # Create Checksums
+        $all_links | Select-Object file_name, checksum | ConvertTo-Json -Depth 2 | Out-File -FilePath "$OutputDir/generic-package-checksums.json"
+        
+        Write-Host "✅ JSON files generated successfully."
+      } else {
+        Write-Error "❌ No matching files found! The JSON will be empty."
+        exit 1
+      }
+      
+      Write-Host "✅ Generic Package Registry download links generated at $OutputDir/generic-package-links.json"
       
       # Create Checksums
       Write-Host "🟢 Generic Package Checksums"
-      $all_links | Select-Object file_name, checksum | ConvertTo-Json -Depth 2 | Out-File -FilePath "$OutputDir/generic-package-checksums.json" -Encoding utf8
-      Write-Host "✅ Finished generating Generic Package Registry checksums."
-      
+      $all_links | Select-Object file_name, checksum | ConvertTo-Json -Depth 2 | Out-File -FilePath "dist/$ENV:CI_PROJECT_NAME/generic-package-checksums.json" -Encoding utf8
+      Write-Host "✅ Generic Package Registry checksums generated at $OutputDir/generic-package-checksums.json"
+
       # Generate Release Notes
-      Write-Host "🟢 Generating release notes for version $env:PROJECT_VERSION..."
+      Write-Host "🟢 Generating release notes..."
       $Release_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace $env:CI_PROJECT_NAMESPACE
       $Release_notes | Out-File -FilePath "$OutputDir/release-notes.md" -Encoding utf8
       Write-Host "✅ Release notes generated at $OutputDir/release-notes.md"
@@ -375,25 +381,31 @@ generate:generic:release:metadata:
 
     # ---------------------------------------------------------
     # STEP 3: Upload (Bash)
-    # We must point to the correct path in dist/
     # ---------------------------------------------------------
     - |
       echo "🟢 Uploading metadata to Generic Registry..."
-      cd "dist/${CI_PROJECT_NAME}"
       
-      curl --fail --header "JOB-TOKEN: $CI_JOB_TOKEN" \
-      --upload-file "./generic-package-checksums.json" \
-      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${CI_PROJECT_NAME}/${PROJECT_VERSION}/generic-package-checksums.json"
-      
-      curl --fail --header "JOB-TOKEN: $CI_JOB_TOKEN" \
-      --upload-file "./generic-package-links.json" \
-      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${CI_PROJECT_NAME}/${PROJECT_VERSION}/generic-package-links.json"
-      
+      # Safety check: Ensure directory exists
+      cd "dist/${CI_PROJECT_NAME}" || { echo "❌ Directory not found"; exit 1; }
+
+      # Define the files you want to upload
+      FILES="generic-package-checksums.json generic-package-links.json"
+
+      for FILE in $FILES; do
+        if [ -f "$FILE" ]; then
+          echo "🔹 Uploading $FILE..."
+          
+          curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+            --upload-file "$FILE" \
+            "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${CI_PROJECT_NAME}/${PROJECT_VERSION}/${FILE}"
+        else
+          echo "⚠️ Warning: '$FILE' not found in $(pwd), skipping."
+        fi
+      done
+
       echo "✅ Upload complete."
 
   artifacts:
-    reports:
-      dotenv: build.env
     paths:
       # Use wildcard if you aren't 100% sure of the project name casing, 
       # otherwise ensure this matches the $OutputDir created above.
@@ -440,15 +452,15 @@ release:gitlab:
         NAME=$(echo "$item" | jq -r '.file_name')
         URL=$(echo "$item" | jq -r '.url')
         echo "🔹 Found asset: $NAME"
-        ASSET_FLAGS="$ASSET_FLAGS --assets-link {\"name\":\"$NAME\",\"url\":\"$URL\"}"
-      done < <(jq -c '.[]' ./generic-package-links.json)
+        ASSET_FLAGS="$ASSET_FLAGeeS --assets-link {\"name\":\"$NAME\",\"url\":\"$URL\"}"
+      done < <(jq -c '.[]' ./dist/${CI_PROJECT_NAME}/generic-package-links.json)
 
       echo "🟢 Creating GitLab release for version ${PROJECT_VERSION}..."
 
       # 3. Create the description string
       # IMPORTANT: EOF must NOT be quoted so that variables like ${PROJECT_VERSION} expand.
       DESCRIPTION=$(cat <<EOF
-      # 📦 ${PROJECT_VERSION} Release
+      # 📦 ${PROJECT_NAME} ${PROJECT_VERSION} Release
 
       ${RELEASE_NOTES}
 
@@ -461,10 +473,10 @@ release:gitlab:
       * https://www.jsr.io/npm/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/v/${PROJECT_VERSION}
 
       ### ▪️ Unpkg CDN
-      * ***ESM***: https://unpkg.com/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js
-      * ***UMD***: https://unpkg.com/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js
-      - ***ESM Minified***: https://unpkg.com/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js
-      - ***UMD Minified***: https://unpkg.com/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js
+      * ***ESM***: \`https://unpkg.com/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js\`
+      * ***UMD***: \`https://unpkg.com/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.js\`
+      - ***ESM Minified***: \`https://unpkg.com/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.min.js\`
+      - ***UMD Minified***: \`https://unpkg.com/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.min.js\`
 
       ### ▪️ jsDelivr CDN
       - ***ESM***: \`https://cdn.jsdelivr.net/npm/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}@${PROJECT_VERSION}/dist/logcad.esm.js\`
@@ -498,6 +510,3 @@ release:gitlab:
         --ref "$CI_COMMIT_SHA" \
         --description "$DESCRIPTION" \
         $ASSET_FLAGS
-  artifacts:
-    reports:
-      dotenv: build.env
