@@ -274,7 +274,7 @@ publish:jsr:auto:
 # ------------------------------------------------------
 # generate generic package download links
 # using phelleams-automtor
-release:generate:generic:release:meta:
+release:generate:generic:release:metadata:
   stage: release
   image: sgkens/phellams-automator:2.5.1
   needs:
@@ -292,8 +292,8 @@ release:generate:generic:release:meta:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
       when: always
   script:
-    - pwsh
     - |
+       pwsh
        write-host "🟢 Generating Generic Package Registry download links for version ${PROJECT_VERSION}..."
        using module ./automator-devops/scripts/core/Request-GenericPackage.psm1
        using module ./automator-devops/scripts/core/Get-RemoteFileHash.psm1
@@ -318,17 +318,16 @@ release:generate:generic:release:meta:
        write-host "🟢 Generating release notes for version ${PROJECT_VERSION}..."
        $Release_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace ${CI_PROJECT_NAME} -Version ${PROJECT_VERSION} -GitlabApiUrl $env:CI_API_V4_URL -ProjectId $env:CI_PROJECT_ID
        $Release_notes | Out-File -FilePath dist/${CI_PROJECT_NAME}/release-notes.md -Encoding utf8
-       
-    - write-host "✅ Release notes generated at dist/${CI_PROJECT_NAME}/release-notes.md"
+       write-host "✅ Release notes generated at dist/${CI_PROJECT_NAME}/release-notes.md"
     - |
       bash
       curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
       --upload-file "generic-package-checksums.json" \
       "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/generic-package-checksums.json"
       curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
-      --upload-file "generic-package-checksums.json" \
+      --upload-file "generic-package-links.json" \
       "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/generic-package-links.json"
-    - echo "✅ Uploaded generic-package-links.json and generic-package-checksums.json to Generic Package Registry"
+    - echo "✅ Uploaded generic-package-links.json and generic-package-links.json to Generic Package Registry"
 
   artifacts:
     reports:
@@ -354,6 +353,8 @@ release:gitlab:
       artifacts: true
     - job: deploy:npm:auto
       artifacts: false
+    - job: release:generate:generic:release:metadata
+      artifacts: true
   rules:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
       when: always  
