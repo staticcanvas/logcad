@@ -100,10 +100,10 @@ deploy:generic:
   script:
     - echo "🟢 Uploading artifacts for version ${PROJECT_VERSION}..."
     # Define the list of files to upload
-    - FILES=./*
+    - FILES=$(ls ./*.js ./*.js.map)
     - |
       for FILE in $FILES; do
-        echo "🔵 Uploading '$FILE' to Generic Gilab package registry..."
+        echo "🔵 Uploading '$FILE' to Generic Gilab package registry...\n"
         curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
              --upload-file "$FILE" \
              "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/${FILE}"
