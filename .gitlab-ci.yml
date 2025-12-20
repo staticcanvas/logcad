@@ -359,16 +359,16 @@ release:generate:generic:release:metadata:
     # We must point to the correct path in dist/
     # ---------------------------------------------------------
     - |
-      echo "🚀 Uploading metadata to Generic Registry..."
+      echo "🟢 Uploading metadata to Generic Registry..."
       cd "dist/${CI_PROJECT_NAME}"
       
       curl --fail --header "JOB-TOKEN: $CI_JOB_TOKEN" \
-      --upload-file "generic-package-checksums.json" \
-      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${CI_PROJECT_NAME}/${PROJECT_VERSION}/generic-package-checksums"
+      --upload-file "./generic-package-checksums.json" \
+      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${CI_PROJECT_NAME}/${PROJECT_VERSION}/generic-package-checksums.json"
       
       curl --fail --header "JOB-TOKEN: $CI_JOB_TOKEN" \
-      --upload-file "generic-package-links.json" \
-      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${CI_PROJECT_NAME}/${PROJECT_VERSION}/generic-package-links"
+      --upload-file "./generic-package-links.json" \
+      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${CI_PROJECT_NAME}/${PROJECT_VERSION}/generic-package-links.json"
       
       echo "✅ Upload complete."
 
