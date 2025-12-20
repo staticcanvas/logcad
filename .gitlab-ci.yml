@@ -99,7 +99,7 @@ deploy:generic:
   script:
     - echo "🟢 Uploading artifacts for version ${PROJECT_VERSION}..."
     # Define the list of files to upload
-    - cd dist/logcad/dist
+    - cd dist/${CI_PROJECT_NAME}/dist
     - FILES=./*
     - |
       for FILE in $FILES; do
@@ -134,7 +134,7 @@ deploy:npm:manual:
   before_script:
     - echo "🔵 Preparing npm publish..."
     - |
-      cd dist/logcad
+      cd dist/${CI_PROJECT_NAME}
       if npm view . >/dev/null 2>&1; then
         echo "ℹ️ npm package already exists. Skipping publish."
         exit 0
@@ -176,7 +176,7 @@ deploy:npm:auto:
     SIGSTORE_ID_TOKEN:
       aud: sigstore
   before_script:
-    - cd dist/logcad
+    - cd dist/${CI_PROJECT_NAME}
       
     - PACKAGE_NAME=$(node -p "require('./package.json').name")
     - PACKAGE_VERSION=$(node -p "require('./package.json').version")
@@ -217,7 +217,7 @@ publish:jsr:auto:
     - job: build
       artifacts: true
   before_script:
-    - cd dist/logcad
+    - cd dist/${CI_PROJECT_NAME}
 
     - echo "🔎 Checking registry for ${PACKAGE_NAME}@${PACKAGE_VERSION}..."
 
@@ -312,7 +312,7 @@ release:generate:generic:release:metadata:
       }
 
       # Fetch Links
-      $links = Request-GenericPackage -ProjectId $env:CI_PROJECT_ID -ProjectName $env:CI_PROJECT_NAME -Version $env:PROJECT_VERSION -GitlabApiUrl $env:CI_API_V4_URL
+      $links = Request-GenericPackage -ProjectId $env:CI_PROJECT_ID -ProjectName $env:CI_PROJECT_NAME -PackageVersion $env:PROJECT_VERSION -GitlabApiUrl $env:CI_API_V4_URL
       
       # Filter Links (Using $env:PROJECT_NAME instead of Bash syntax)
       $ESM       = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.esm.js" }       | Sort-Object created_at -Descending | Select-Object -First 1
@@ -336,7 +336,7 @@ release:generate:generic:release:metadata:
       
       # Generate Release Notes
       Write-Host "🟢 Generating release notes for version $env:PROJECT_VERSION..."
-      $Release_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace $env:CI_PROJECT_NAME -Version $env:PROJECT_VERSION -GitlabApiUrl $env:CI_API_V4_URL -ProjectId $env:CI_PROJECT_ID
+      $Release_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace $env:CI_PROJECT_NAME
       $Release_notes | Out-File -FilePath "$OutputDir/release-notes.md" -Encoding utf8
       Write-Host "✅ Release notes generated at $OutputDir/release-notes.md"
       
@@ -427,7 +427,7 @@ release:gitlab:
         - name: 'Release Notes'
           url: '$(jq -r ./generic-package-checksums.json | .[] | select(.file_name=="generic-package-checksums.json") | .url)'
     description: |  
-      # 📦 Version ${PROJECT_VERSION} Release
+      # 📦 ${PROJECT_VERSION} Release
 
       ${RELEASE_NOTES}
 
