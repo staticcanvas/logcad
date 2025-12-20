@@ -301,6 +301,7 @@ generate:generic:release:metadata:
     # STEP 1: Create the PowerShell Script
     # We write the content to 'generate_meta.ps1' first.
     # We use 'EOF' (quoted) to prevent Bash from trying to expand variables.
+    # This allows PowerShell to handle the variables instead.
     # ---------------------------------------------------------
     - |
       cat <<'EOF' > generate_meta.ps1
