@@ -299,13 +299,13 @@ release:generate:generic:release:metadata:
     # ---------------------------------------------------------
     - |
       cat <<'EOF' > generate_meta.ps1
-      
-      Write-Host "🟢 Generating Generic Package Registry download links for version $env:PROJECT_VERSION..."
-      
+
       # Import Modules
       using module ./automator-devops/scripts/core/Request-GenericPackage.psm1
       using module ./automator-devops/scripts/core/Get-RemoteFileHash.psm1
-      
+
+      Write-Host "🟢 Generating Generic Package Registry download links for version $env:PROJECT_VERSION..."
+            
       # Ensure Output Directory Exists
       $OutputDir = "dist/$env:CI_PROJECT_NAME"
       if (!(Test-Path -Path $OutputDir)) {
