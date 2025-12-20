@@ -144,7 +144,6 @@ deploy:npm:manual:
   script:
     - echo "🟢 Publishing to npm..."
     - |
-    - cd dist/logcad
     - npm install -g npm@latest
     - npm ci
     - npm whoami
@@ -193,7 +192,6 @@ deploy:npm:auto:
       fi
   script:
     - echo "🟢 Auto-publishing to npm..."
-    - cd ./dist/logcad
     - npm install -g npm@latest
     - npm ci
     - npm publish --access public
