@@ -2,38 +2,46 @@
 
 A lightweight utility for styled console logging and simple debug message capture.
 
+## ◾**Overview**
+- **Purpose**: Logs CSS-styled messages to the browser console and captures short debug entries to `localStorage` for lightweight client-side debugging.
+- **Key exports**: 
+  - `logcad.logc` (styled console output)
+  - `logcad.logd` (debug logger that records to `localStorage`, dispatches a `debuglog` event).
+  - `logcad.logdrl` (debug log reader that reads from `localStorage` and dispatches a `debuglog` event).
+
 ## ◾ **Features**
 - **Styled console output**: Compose messages using simple objects (color, background, bold/italic/underline, border).
 - **Debug log Event**: Dispatches a `debuglog` event for realtime consumers.
 - **Debug capture**: `logd` stores debug entries in `localStorage` under `_debug_log` and dispatches a `debuglog` event for realtime consumers.
 - **Zero dependencies**: Pure JavaScript, designed for use in browser environments and CommonJS builds.
 
+#  **Installation**
 
-## ◾ **Installation**
-
-1. **CDN**:    
+* **CDN**:    
    - Link from a ***jsdelivr*** CDN
    - Link from a ***unpkg*** CDN
+      > If you used a `CDN` link, you're good to go! `logcad` will be available in the global scope via `window.logc`, `window.logd`, and `window.logdrl` functions or just `logc`, `logd`, and `logdrl` functions as they are available in the global scope in browser environment.
   
-    > If you used a `CDN` link, you're good to go! `logcad` will be available in the global scope via `window.logc`, `window.logd`, and `window.logdrl` functions or just `logc`, `logd`, and `logdrl` functions as they are available in the global scope in browser environment.
-    > if you use a `CND` with `type=module`:
+  - if you use a `CND` with `type=module`:
     ```javascript
     import * as logcad from 'https://cdn.jsdelivr.net/npm/@staticcanvas/logcad@{version}/dist/logcad.esm.js';
     // logcad is now available in the global scope `window.logc`, `window.logd`, `window.logdrl` or just `logc`, `logd`, `logdrl`
     ```
 
-2. **NPM**: `npm install logcad@latest --save --save-dev`
+* **NPM**: `npm install logcad@latest --save --save-dev`
     - Add `logcad` as a devDependency and don't forget to add it in your `package.json` dependencies.
     - Use: 
       ```javascript
       import * as logcad from 'logcad';`
-
-**🛑 Requirements**: \
+      ```
+> !note \
+> **🛑 Requirements**: \
 Node.js for local builds; runs in modern browsers that provide `console`, `localStorage`, and `CustomEvent`.
+
 
 ## 🟢 **Quick Start**
 
-- **Vanilla(`UMD(browser)`)** via `<script src="path|url">` tag:
+- **Vanilla(`UMD(browser)`)** via `<script src="path|url">` tag: will be available in the global scope via `window.logcad`, `window.logc`,  `window.logd`. `window.logdrl`.
   ```html
   <script src="path/to/logcad.js"></script>
   <!-- or via cdn: jsdelivr -->
@@ -42,7 +50,7 @@ Node.js for local builds; runs in modern browsers that provide `console`, `local
   <script src="https://unpkg.com/@staticcanvas/logcad@0.3.0/dist/logcad.js"></script>
   ```
   ```javascript
-  // UMD (browser)
+  // UMD
   logcad.logc([
     { text: 'Hello UMD(browser)', c: '#fff', bg: '#333', b: true },
     { text: ' Export Type', c: '#fff', bg: '#333', b: true }
@@ -60,18 +68,16 @@ Node.js for local builds; runs in modern browsers that provide `console`, `local
     'init', 
     'App initialized',
   )
-
   // or access via `window.logc` and `window.logd` which can be called via logc, logd, logdrl as they are available in the global scope in browser environment
   ```
 
-- **ESM6 Module(`ESM6(browser)` with `type="module"`)**:
+- **ESM6 Module(`ESM6(browser)` with `type="module"`)**: import from file or cdn and walla!
 
   ```javascript
-  // Import from local path
   import { logc, logd } from 'path/to/logcad.js';
-  // or import from a CDN
+  // or
   import { logc, logd } from 'https://cdn.jsdelivr.net/npm/@staticcanvas/logcad@{version}/dist/logcad.esm.js';
-  // or import namespaced logc, logd in logcad namespace
+  // or 
   import logcad from 'https://cdn.jsdelivr.net/npm/@staticcanvas/logcad@{version}/dist/logcad.esm.js';
 
   // UMD
