@@ -103,10 +103,11 @@ deploy:generic:
     - FILES=$(ls ./*.js ./*.js.map)
     - |
       for FILE in $FILES; do
-        echo "🔵 Uploading '$FILE' to Generic Gilab package registry...\n"
+        FILENAME=$(basename "$FILE")
+        echo "🔵 Uploading '$FILENAME' to Generic Gilab package registry...\n"
         curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
              --upload-file "$FILE" \
-             "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/${FILE}"
+             "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/${FILENAME}"
       done
     - echo "✅ All artifacts uploaded to Generic Registry \n"
   rules:
