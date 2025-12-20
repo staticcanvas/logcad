@@ -314,7 +314,7 @@ release:generate:generic:release:metadata:
       }
 
       # Fetch Links
-      $links = Request-GenericPackage -ProjectId $env:CI_PROJECT_ID -ProjectName $env:CI_PROJECT_NAME -Namespace $env:CI_PROJECT_NAMESPACE -PackageVersion $env:PROJECT_VERSION -ApiKey $env:CI_JOB_TOKEN -ApiUrl $env:CI_API_V4_URL -ci
+      $links = Request-GenericPackage -ProjectId $env:CI_PROJECT_ID -PackageName $env:CI_PROJECT_NAME -ProjectName $env:CI_PROJECT_NAME -Namespace $env:CI_PROJECT_NAMESPACE -PackageVersion $env:PROJECT_VERSION -ApiKey $env:CI_JOB_TOKEN -ApiUrl $env:CI_API_V4_URL -ci
       
       # Filter Links (Using $env:PROJECT_NAME instead of Bash syntax)
       $ESM       = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.esm.js" }       | Sort-Object created_at -Descending | Select-Object -First 1
