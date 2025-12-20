@@ -79,7 +79,6 @@ build:
       - dist/
     expire_in: 1 week
     reports:
-      # This allows the 'release' section below to access $PROJECT_VERSION
       dotenv: build.env
   only:
     - merge_requests
@@ -115,7 +114,6 @@ deploy:generic:
       when: always
   artifacts:
     reports:
-      # This allows the 'release' section below to access $PROJECT_VERSION
       dotenv: build.env
 
 # ------------------------------------------------------
@@ -135,7 +133,6 @@ deploy:npm:manual:
       aud: sigstore
   before_script:
     - echo "🔵 Preparing npm publish..."
-    # check to see if npm package exists
     - |
       cd dist/logcad
       if npm view . >/dev/null 2>&1; then
@@ -162,7 +159,6 @@ deploy:npm:manual:
     url: https://www.npmjs.com/package/${CI_PROJECT_NAME}
   artifacts:
     reports:
-      # This allows the 'release' section below to access $PROJECT_VERSION
       dotenv: build.env
 
 # ------------------------------------------------------
@@ -181,19 +177,22 @@ deploy:npm:auto:
     SIGSTORE_ID_TOKEN:
       aud: sigstore
   before_script:
-    - echo "🔵 Preparing npm publish..."
-    # check to see if npm package exists
+    - cd dist/logcad
+      
+    - PACKAGE_NAME=$(node -p "require('./package.json').name")
+    - PACKAGE_VERSION=$(node -p "require('./package.json').version")
+      
     - |
-      cd dist/logcad
-      if npm view . >/dev/null 2>&1; then
-        echo "ℹ️ npm package already exists. Skipping publish."
+      echo "🔎 Checking registry for ${PACKAGE_NAME}@${PACKAGE_VERSION}..."
+      
+      if [[ $(npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version 2>/dev/null) ]]; then
+        echo "🛑 Version ${PACKAGE_VERSION} is already published to npm. Skipping."
         exit 0
       else
-        echo "ℹ️ npm package does not exist. Proceeding with publish."
+        echo "🟢 Version ${PACKAGE_VERSION} is new. Publishing..."
       fi
   script:
     - echo "🟢 Auto-publishing to npm..."
-    - |
     - cd ./dist/logcad
     - npm install -g npm@latest
     - npm ci
@@ -208,7 +207,6 @@ deploy:npm:auto:
     url: https://www.npmjs.com/package/${CI_PROJECT_NAME}
   artifacts:
     reports:
-      # This allows the 'release' section below to access $PROJECT_VERSION
       dotenv: build.env
       
 # ------------------------------------------------------
@@ -221,15 +219,19 @@ publish:jsr:auto:
     - job: build
       artifacts: true
   before_script:
-    - echo "🔵 Preparing JSR publish..."
-    # check to see if JSR package exists
+    - cd dist/logcad
+
+    - echo "🔎 Checking registry for ${PACKAGE_NAME}@${PACKAGE_VERSION}..."
+
+    - PACKAGE_NAME=$(node -p "require('./package.json').name")
+    - PACKAGE_VERSION=$(node -p "require('./package.json').version")
+
     - |
-      cd dist/logcad
-      if npx jsr view @${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME} >/dev/null 2>&1; then
-        echo "ℹ️ JSR package already exists. Skipping publish."
+      if npx jsr view @${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}@${PACKAGE_VERSION} >/dev/null 2>&1; then
+        echo "🛑 JSR package already exists. Skipping publish."
         exit 0
       else
-        echo "ℹ️ JSR package does not exist. Proceeding with publish."
+        echo "🟢 JSR package does not exist. Proceeding with publish."
       fi
   script:
     # npx jsr publish automatically detects the token above
