@@ -271,9 +271,6 @@ publish:jsr:auto:
 #     - $Release_notes | Out-File -FilePath dist/${CI_PROJECT_NAME}/release-notes.md -Encoding utf8
 #     - write-host "✅ Release notes generated at dist/${CI_PROJECT_NAME}/release-notes.md"
 
-# ------------------------------------------------------
-# generate generic package download links
-# using phelleams-automtor
 release:generate:generic:release:metadata:
   stage: release
   image: sgkens/phellams-automator:2.5.1
@@ -284,59 +281,100 @@ release:generate:generic:release:metadata:
       artifacts: true
     - job: deploy:npm:auto
       artifacts: false
+  
   before_script:
-    - pwsh 
-    - write-host "🔵 Preparing release notes generation..."
+    # 1. Use standard echo (Bash) or pwsh -c for logging here
+    - echo "🔵 Preparing release notes generation..."
     - git clone https://gitlab.com/phellams/automator-devops.git
+
   rules:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
       when: always
+
   script:
+    # ---------------------------------------------------------
+    # STEP 1: Create the PowerShell Script
+    # We write the content to 'generate_meta.ps1' first.
+    # We use 'EOF' (quoted) to prevent Bash from trying to expand variables.
+    # ---------------------------------------------------------
     - |
-       pwsh
-       write-host "🟢 Generating Generic Package Registry download links for version ${PROJECT_VERSION}..."
-       using module ./automator-devops/scripts/core/Request-GenericPackage.psm1
-       using module ./automator-devops/scripts/core/Get-RemoteFileHash.psm1
-       $links = Get-GenericPackageLinks -ProjectId $env:CI_PROJECT_ID -ProjectName $env:CI_PROJECT_NAME -Version $env:PROJECT_VERSION -GitlabApiUrl $env:CI_API_V4_URL
-       $ESM = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.esm.js'} | Sort-Object created_at -Descending)[0]
-       $ESMMap = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.esm.js.map'} | Sort-Object created_at -Descending)[0]
-       $ESMMin = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.esm.min.js'} | Sort-Object created_at -Descending)[0]
-       $ESMMinMap = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.esm.min.js.map'} | Sort-Object created_at -Descending)[0]
-       $UMD = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.js'} | Sort-Object created_at -Descending)[0]
-       $UMDMin = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.min.js'} | Sort-Object created_at -Descending)[0]
-       $UMDMap = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.js.map'} | Sort-Object created_at -Descending)[0]
-       $UMDMinMap = $links | (Where-Object { $_.file_name -eq '${PROJECT_NAME}.min.js.map'} | Sort-Object created_at -Descending)[0]
-       
-       $all_links = $ESM, $ESMMap, $ESMMin, $ESMMinMap, $UMD, $UMDMin, $UMDMap, $UMDMinMap
-       $all_links | convertto-json -depth 2 | Out-File -FilePath dist/${CI_PROJECT_NAME}/generic-package-links.json -Encoding utf8
-       write-host "✅ Generic Package Registry download links generated."
-       
-       write-host "🟢 Generic Package Checksums"
-       $all_links | select-object file_name, checksum | convertto-json -depth 2 | Out-File -FilePath dist/${CI_PROJECT_NAME}/generic-package-checksums.json -Encoding utf8
-       write-host "✅ Finished generating Generic Package Registry checksums."
-       
-       write-host "🟢 Generating release notes for version ${PROJECT_VERSION}..."
-       $Release_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace ${CI_PROJECT_NAME} -Version ${PROJECT_VERSION} -GitlabApiUrl $env:CI_API_V4_URL -ProjectId $env:CI_PROJECT_ID
-       $Release_notes | Out-File -FilePath dist/${CI_PROJECT_NAME}/release-notes.md -Encoding utf8
-       write-host "✅ Release notes generated at dist/${CI_PROJECT_NAME}/release-notes.md"
+      cat <<'EOF' > generate_meta.ps1
+      
+      Write-Host "🟢 Generating Generic Package Registry download links for version $env:PROJECT_VERSION..."
+      
+      # Import Modules
+      using module ./automator-devops/scripts/core/Request-GenericPackage.psm1
+      using module ./automator-devops/scripts/core/Get-RemoteFileHash.psm1
+      
+      # Ensure Output Directory Exists
+      $OutputDir = "dist/$env:CI_PROJECT_NAME"
+      if (!(Test-Path -Path $OutputDir)) {
+          New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
+      }
+
+      # Fetch Links
+      $links = Get-GenericPackageLinks -ProjectId $env:CI_PROJECT_ID -ProjectName $env:CI_PROJECT_NAME -Version $env:PROJECT_VERSION -GitlabApiUrl $env:CI_API_V4_URL
+      
+      # Filter Links (Using $env:PROJECT_NAME instead of Bash syntax)
+      $ESM       = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.esm.js" }       | Sort-Object created_at -Descending | Select-Object -First 1
+      $ESMMap    = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.esm.js.map" }   | Sort-Object created_at -Descending | Select-Object -First 1
+      $ESMMin    = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.esm.min.js" }   | Sort-Object created_at -Descending | Select-Object -First 1
+      $ESMMinMap = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.esm.min.js.map" }| Sort-Object created_at -Descending | Select-Object -First 1
+      $UMD       = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.js" }           | Sort-Object created_at -Descending | Select-Object -First 1
+      $UMDMin    = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.min.js" }       | Sort-Object created_at -Descending | Select-Object -First 1
+      $UMDMap    = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.js.map" }       | Sort-Object created_at -Descending | Select-Object -First 1
+      $UMDMinMap = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.min.js.map" }   | Sort-Object created_at -Descending | Select-Object -First 1
+      
+      # Create JSON
+      $all_links = @($ESM, $ESMMap, $ESMMin, $ESMMinMap, $UMD, $UMDMin, $UMDMap, $UMDMinMap)
+      $all_links | ConvertTo-Json -Depth 5 | Out-File -FilePath "$OutputDir/generic-package-links.json" -Encoding utf8
+      Write-Host "✅ Generic Package Registry download links generated."
+      
+      # Create Checksums
+      Write-Host "🟢 Generic Package Checksums"
+      $all_links | Select-Object file_name, checksum | ConvertTo-Json -Depth 2 | Out-File -FilePath "$OutputDir/generic-package-checksums.json" -Encoding utf8
+      Write-Host "✅ Finished generating Generic Package Registry checksums."
+      
+      # Generate Release Notes
+      Write-Host "🟢 Generating release notes for version $env:PROJECT_VERSION..."
+      $Release_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace $env:CI_PROJECT_NAME -Version $env:PROJECT_VERSION -GitlabApiUrl $env:CI_API_V4_URL -ProjectId $env:CI_PROJECT_ID
+      $Release_notes | Out-File -FilePath "$OutputDir/release-notes.md" -Encoding utf8
+      Write-Host "✅ Release notes generated at $OutputDir/release-notes.md"
+      
+      EOF
+
+    # ---------------------------------------------------------
+    # STEP 2: Execute the Script
+    # ---------------------------------------------------------
+    - pwsh ./generate_meta.ps1
+
+    # ---------------------------------------------------------
+    # STEP 3: Upload (Bash)
+    # We must point to the correct path in dist/
+    # ---------------------------------------------------------
     - |
-      bash
-      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+      echo "🚀 Uploading metadata to Generic Registry..."
+      cd "dist/${CI_PROJECT_NAME}"
+      
+      curl --fail --header "JOB-TOKEN: $CI_JOB_TOKEN" \
       --upload-file "generic-package-checksums.json" \
       "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/generic-package-checksums.json"
-      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+      
+      curl --fail --header "JOB-TOKEN: $CI_JOB_TOKEN" \
       --upload-file "generic-package-links.json" \
       "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PROJECT_NAME}/${PROJECT_VERSION}/generic-package-links.json"
-    - echo "✅ Uploaded generic-package-links.json and generic-package-links.json to Generic Package Registry"
+      
+      echo "✅ Upload complete."
 
   artifacts:
     reports:
-      # This allows the 'release' section below to access $PROJECT_VERSION
       dotenv: build.env
     paths:
-      - dist/logcad/generic-package-links.json
-      - dist/logcad/generic-package-checksums.json
-      - dist/logcad/release-notes.md
+      # Use wildcard if you aren't 100% sure of the project name casing, 
+      # otherwise ensure this matches the $OutputDir created above.
+      - dist/*/generic-package-links.json
+      - dist/*/generic-package-checksums.json
+      - dist/*/release-notes.md
 
 # ------------------------------------------------------
 # Create GitLab release
