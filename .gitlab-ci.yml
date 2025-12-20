@@ -117,9 +117,9 @@ deploy:generic:
   rules:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
       when: always
-  artifacts:
-    reports:
-      dotenv: build.env
+  environment:
+    name: Generic
+    url: https://gitlab.com/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/-/packages/generic/${CI_PROJECT_NAME}/${PROJECT_VERSION}
 
 # ------------------------------------------------------
 # Deploy to npm (triggers jsDelivr automatically)
@@ -161,9 +161,6 @@ deploy:npm:manual:
   environment:
     name: npm
     url: https://www.npmjs.com/package/${CI_PROJECT_NAME}
-  artifacts:
-    reports:
-      dotenv: build.env
 
 # ------------------------------------------------------
 # Auto-deploy on version tags (v1.0.0, 1.0.0, etc.)
@@ -208,9 +205,6 @@ deploy:npm:auto:
   environment:
     name: npm
     url: https://www.npmjs.com/package/${CI_PROJECT_NAME}
-  artifacts:
-    reports:
-      dotenv: build.env
       
 # ------------------------------------------------------
 # Publish to JSR (JavaScript Registry) for supply chain security
@@ -243,6 +237,9 @@ publish:jsr:auto:
   rules:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
       when: always
+  environment:
+    name: JSR
+    url: https://www.jsr.io/npm/@${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/v/${PACKAGE_VERSION}
 
 # # ------------------------------------------------------
 # # Generate release notes
@@ -291,7 +288,6 @@ generate:generic:release:metadata:
     - git clone https://gitlab.com/phellams/automator-devops.git
     # fetch full git history for accurate release notes
     - git fetch --unshallow
-
   rules:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+.*$/
       when: always
@@ -345,20 +341,20 @@ generate:generic:release:metadata:
       }
 
       # 4. Export JSON
-      $all_links | ConvertTo-Json -Depth 5 | Out-File -FilePath "dist/${CI_PROJECT_NAME}/generic-package-links.json" -Encoding utf8
+      $all_links | ConvertTo-Json -Depth 5 | Out-File -FilePath "dist/$ENV:CI_PROJECT_NAME/generic-package-links.json" -Encoding utf8
       
-      Write-Host "✅ Generic Package Registry download links generated."
+      Write-Host "✅ Generic Package Registry download links generated at dist/$ENV:CI_PROJECT_NAME/generic-package-links.json"
       
       # Create Checksums
       Write-Host "🟢 Generic Package Checksums"
-      $all_links | Select-Object file_name, checksum | ConvertTo-Json -Depth 2 | Out-File -FilePath "dist/${CI_PROJECT_NAME}/generic-package-checksums.json" -Encoding utf8
-      Write-Host "✅ Generic Package Registry checksums generated."
+      $all_links | Select-Object file_name, checksum | ConvertTo-Json -Depth 2 | Out-File -FilePath "dist/$ENV:CI_PROJECT_NAME/generic-package-checksums.json" -Encoding utf8
+      Write-Host "✅ Generic Package Registry checksums generated at dist/$ENV:CI_PROJECT_NAME/generic-package-checksums.json"
       
       # Generate Release Notes
       Write-Host "🟢 Generating release notes for version $env:PROJECT_VERSION..."
       $Release_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace $env:CI_PROJECT_NAMESPACE
-      $Release_notes | Out-File -FilePath "dist/${CI_PROJECT_NAME}/release-notes.md" -Encoding utf8
-      Write-Host "✅ Release notes generated at dist/${CI_PROJECT_NAME}/release-notes.md"
+      $Release_notes | Out-File -FilePath "dist/$ENV:CI_PROJECT_NAME/release-notes.md" -Encoding utf8
+      Write-Host "✅ Release notes generated at dist/$ENV:CI_PROJECT_NAME/release-notes.md"
       
       EOF
 
@@ -383,7 +379,7 @@ generate:generic:release:metadata:
         if [ -f "$FILE" ]; then
           echo "🔹 Uploading $FILE..."
           
-          curl --fail --silent --show-error --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+          curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
             --upload-file "$FILE" \
             "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${CI_PROJECT_NAME}/${PROJECT_VERSION}/${FILE}"
         else
@@ -394,8 +390,6 @@ generate:generic:release:metadata:
       echo "✅ Upload complete."
 
   artifacts:
-    reports:
-      dotenv: build.env
     paths:
       # Use wildcard if you aren't 100% sure of the project name casing, 
       # otherwise ensure this matches the $OutputDir created above.
@@ -500,6 +494,3 @@ release:gitlab:
         --ref "$CI_COMMIT_SHA" \
         --description "$DESCRIPTION" \
         $ASSET_FLAGS
-  artifacts:
-    reports:
-      dotenv: build.env
