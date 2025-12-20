@@ -303,6 +303,7 @@ release:generate:generic:release:metadata:
       # Import Modules
       using module ./automator-devops/scripts/core/Request-GenericPackage.psm1
       using module ./automator-devops/scripts/core/Get-RemoteFileHash.psm1
+      using module ./automator-devops/scripts/release/Get-ReleaseNotes.psm1
 
       Write-Host "🟢 Generating Generic Package Registry download links for version $env:PROJECT_VERSION..."
             
@@ -313,7 +314,7 @@ release:generate:generic:release:metadata:
       }
 
       # Fetch Links
-      $links = Get-GenericPackageLinks -ProjectId $env:CI_PROJECT_ID -ProjectName $env:CI_PROJECT_NAME -Version $env:PROJECT_VERSION -GitlabApiUrl $env:CI_API_V4_URL
+      $links = Request-GenericPackage -ProjectId $env:CI_PROJECT_ID -ProjectName $env:CI_PROJECT_NAME -Version $env:PROJECT_VERSION -GitlabApiUrl $env:CI_API_V4_URL
       
       # Filter Links (Using $env:PROJECT_NAME instead of Bash syntax)
       $ESM       = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.esm.js" }       | Sort-Object created_at -Descending | Select-Object -First 1
