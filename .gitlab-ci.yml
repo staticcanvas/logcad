@@ -318,22 +318,40 @@ generate:generic:release:metadata:
           New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
       }
 
-      # Fetch Links
-      $links = Request-GenericPackage -ProjectId $env:CI_PROJECT_ID -PackageName $env:CI_PROJECT_NAME -ProjectName $env:CI_PROJECT_NAME -Namespace $env:CI_PROJECT_NAMESPACE -PackageVersion $env:PROJECT_VERSION -ApiKey $env:CI_JOB_TOKEN -ApiUrl $env:CI_API_V4_URL -ci
-      
-      # Filter Links (Using $env:PROJECT_NAME instead of Bash syntax)
-      $ESM       = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.esm.js" }       | Sort-Object created_at -Descending | Select-Object -First 1
-      $ESMMap    = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.esm.js.map" }   | Sort-Object created_at -Descending | Select-Object -First 1
-      $ESMMin    = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.esm.min.js" }   | Sort-Object created_at -Descending | Select-Object -First 1
-      $ESMMinMap = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.esm.min.js.map" }| Sort-Object created_at -Descending | Select-Object -First 1
-      $UMD       = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.js" }           | Sort-Object created_at -Descending | Select-Object -First 1
-      $UMDMin    = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.min.js" }       | Sort-Object created_at -Descending | Select-Object -First 1
-      $UMDMap    = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.js.map" }       | Sort-Object created_at -Descending | Select-Object -First 1
-      $UMDMinMap = $links | Where-Object { $_.file_name -eq "$env:PROJECT_NAME.min.js.map" }   | Sort-Object created_at -Descending | Select-Object -First 1
-      
-      # Create JSON
-      $all_links = @($ESM, $ESMMap, $ESMMin, $ESMMinMap, $UMD, $UMDMin, $UMDMap, $UMDMinMap)
+      # 1. Fetch Links (Use Splatting for readability)
+      $params = @{
+          ProjectId      = $env:CI_PROJECT_ID
+          PackageName    = $env:CI_PROJECT_NAME
+          ProjectName    = $env:CI_PROJECT_NAME
+          Namespace      = $env:CI_PROJECT_NAMESPACE
+          PackageVersion = $env:PROJECT_VERSION
+          ApiKey         = $env:CI_JOB_TOKEN
+          ApiUrl         = $env:CI_API_V4_URL
+          ci             = $true
+      }
+      $links = Request-GenericPackage @params
+
+      # 2. Define the extensions you want to capture
+      $suffixes = @(
+          '.esm.js', '.esm.js.map', 
+          '.esm.min.js', '.esm.min.js.map', 
+          '.js', '.min.js', 
+          '.js.map', '.min.js.map'
+      )
+
+      # 3. Filter and Select (Loop logic)
+      $all_links = $suffixes | ForEach-Object {
+          $targetFile = "$env:PROJECT_NAME$_"
+          
+          # Find the file, sort by newest, take the first one
+          $links | Where-Object { $_.file_name -eq $targetFile } | 
+                  Sort-Object created_at -Descending | 
+                  Select-Object -First 1
+      }
+
+      # 4. Export JSON
       $all_links | ConvertTo-Json -Depth 5 | Out-File -FilePath "$OutputDir/generic-package-links.json" -Encoding utf8
+      
       Write-Host "✅ Generic Package Registry download links generated."
       
       # Create Checksums
