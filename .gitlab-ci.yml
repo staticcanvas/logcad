@@ -183,11 +183,11 @@ deploy:npm:auto:
   needs:
     - job: build
       artifacts: true
-  id_tokens:
-    NPM_ID_TOKEN:
-      aud: "npm:registry.npmjs.org"
-    SIGSTORE_ID_TOKEN:
-      aud: sigstore
+  # id_tokens:
+  #   NPM_ID_TOKEN:
+  #     aud: "npm:registry.npmjs.org"
+  #   SIGSTORE_ID_TOKEN:
+  #     aud: sigstore
   before_script:
     - cd dist/${CI_PROJECT_NAME}
       
@@ -205,6 +205,7 @@ deploy:npm:auto:
       fi
   script:
     - echo "🟢 Auto-publishing to npm..."
+    - echo //registry.npmjs.org/:_authToken=${NPM_API_KEY} > .npmrc
     - npm install -g npm@latest
     - npm ci
     - npm publish --access public
