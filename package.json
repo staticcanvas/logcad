@@ -1,6 +1,6 @@
 {
   "name": "@staticcanvas/logcad",
-  "version": "0.4.23",
+  "version": "0.6.0",
   "description": "A lightweight utility for styled console logging and simple debug message capture in the console",
   "license": "MIT",
   "type": "module",
@@ -44,7 +44,7 @@
   ],
   "scripts": {
     "dev": "vite build --watch",
-    "build": "vite build",
+    "build": "npm install --package-lock-only && vite build",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
     "update:npm": "npm install -g npm@latest",
@@ -69,7 +69,8 @@
     "vite": "^7.2.4",
     "vite-plugin-banner": "^0.7.0",
     "eslint-config-prettier": "^8.8.0",
-    "prettier": "^2.8.8"
+    "prettier": "^2.8.8",
+    "vite-plugin-dts": "^4.5.4"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -79,18 +80,3 @@
     "not ie < 11"
   ]
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

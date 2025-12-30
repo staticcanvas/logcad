@@ -1,5 +1,17 @@
 # Changelog
 
+## **logcad** v0.6.0
+
+- ADD: Type Inference for intelisence
+
+## **logcad** v0.4.23
+
+- FIXED: ci build release and releast metadata stages
+
+## **logcad** v0.4.21
+
+- UPDATE: Release template, build now generates and uploads generic packages
+
 ## **logcad** v0.4.19
 
 - Complete build release and auto publish

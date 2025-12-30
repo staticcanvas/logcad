@@ -22,6 +22,8 @@ stages:
 # ------------------------------------------------------
 lint:
   stage: lint
+  tags:
+    - docker
   script:
     - echo "🔍 Linting code..."
     - npm ci
@@ -61,6 +63,8 @@ lint:
 # ------------------------------------------------------
 build:
   stage: build
+  tags:
+    - docker
   before_script:
     - echo "🔵 Preparing build..."
     - apt-get update && apt-get install -y jq
@@ -86,11 +90,14 @@ build:
     - tags
   allow_failure: false
 
+
 # ------------------------------------------------------
 # Deploy to Generic Package Registry
 # ------------------------------------------------------
 deploy:generic:
   stage: deploy
+  tags:
+    - docker
   needs:
     - job: build
       artifacts: true
@@ -128,6 +135,8 @@ deploy:generic:
 # ------------------------------------------------------
 deploy:npm:manual:
   stage: deploy
+  tags:
+    - docker
   needs:
     - job: build
       artifacts: true
@@ -169,6 +178,8 @@ deploy:npm:manual:
 # ------------------------------------------------------
 deploy:npm:auto:
   stage: deploy
+  tags:
+    - docker
   needs:
     - job: build
       artifacts: true
@@ -212,6 +223,8 @@ deploy:npm:auto:
 # ------------------------------------------------------
 publish:jsr:auto:
   stage: deploy
+  tags:
+    - docker
   needs:
     - job: build
       artifacts: true
@@ -273,6 +286,8 @@ publish:jsr:auto:
 
 generate:generic:release:metadata:
   stage: release
+  tags:
+    - docker
   image: sgkens/phellams-automator:2.5.1
   needs:
     - job: deploy:generic
@@ -322,6 +337,9 @@ generate:generic:release:metadata:
       }
       $links = Request-GenericPackage @params
 
+      # 🔍 DEBUG: Print the count to the logs so we know if it worked
+      Write-Host "🔹 Found $($links.Count) matching files."
+
       # 2. Define the extensions you want to capture
       $suffixes = @(
           '.esm.js', '.esm.js.map', 
@@ -332,7 +350,7 @@ generate:generic:release:metadata:
 
       # 3. Filter and Select (Loop logic)
       $all_links = $suffixes | ForEach-Object {
-          $targetFile = "$env:PROJECT_NAME$_"
+          $targetFile = "$env:CI_PROJECT_NAME$_"
           
           # Find the file, sort by newest, take the first one
           $links | Where-Object { $_.file_name -eq $targetFile } | 
@@ -371,7 +389,7 @@ generate:generic:release:metadata:
       $Release_notes = Get-ReleaseNotes -AheadOnly -FeatureNotes -BreakingChanges -FeatureAdditions -Notes -FeatureUpdates -CommitLink -CommitLinkPrefix gitlab -NameSpace $env:CI_PROJECT_NAMESPACE
       $Release_notes | Out-File -FilePath "$OutputDir/release-notes.md" -Encoding utf8
       Write-Host "✅ Release notes generated at $OutputDir/release-notes.md"
-      
+
       EOF
 
     # ---------------------------------------------------------
@@ -420,6 +438,8 @@ generate:generic:release:metadata:
 # ------------------------------------------------------
 release:gitlab:
   stage: release
+  tags:
+    - docker
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   needs:
     - job: deploy:generic
@@ -450,9 +470,9 @@ release:gitlab:
       # 2. Iterate over the JSON file and build the CLI flags dynamically
       while IFS= read -r item; do
         NAME=$(echo "$item" | jq -r '.file_name')
-        URL=$(echo "$item" | jq -r '.url')
+        URL=$(echo "$item" | jq -r '.download_url')
         echo "🔹 Found asset: $NAME"
-        ASSET_FLAGS="$ASSET_FLAGeeS --assets-link {\"name\":\"$NAME\",\"url\":\"$URL\"}"
+        ASSET_FLAGS="$ASSET_FLAGS --assets-link {\"name\":\"$NAME\",\"url\":\"$URL\"}"
       done < <(jq -c '.[]' ./dist/${CI_PROJECT_NAME}/generic-package-links.json)
 
       echo "🟢 Creating GitLab release for version ${PROJECT_VERSION}..."
@@ -460,7 +480,7 @@ release:gitlab:
       # 3. Create the description string
       # IMPORTANT: EOF must NOT be quoted so that variables like ${PROJECT_VERSION} expand.
       DESCRIPTION=$(cat <<EOF
-      # 📦 ${PROJECT_NAME} ${PROJECT_VERSION} Release
+      # <img src="https://raw.githubusercontent.com/staticcanvas/general-resources/main/logos/logcad/dist/png/logcad-128x128.png" width="64" > ${PROJECT_NAME} ${PROJECT_VERSION} Release
 
       ${RELEASE_NOTES}
 

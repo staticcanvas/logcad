@@ -9,6 +9,7 @@ import copy from 'rollup-plugin-copy';
 import { resolve } from 'path';
 import fs from 'fs';
 import terser from '@rollup/plugin-terser';
+import dts from 'vite-plugin-dts'
 
 const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 
@@ -171,5 +172,12 @@ export default defineConfig({
       ],
       hook: 'writeBundle', // Run after build finishes
     }),
+    dts({
+      // This is the magic part for Vanilla JS
+      outDir: `dist/${pkg_name_WNNS}/src`,
+      tsconfigPath: './tsconfig.json',
+      insertTypesEntry: true,
+      copyDtsFiles: true
+    })
   ],
 });
