@@ -22,6 +22,8 @@ stages:
 # ------------------------------------------------------
 lint:
   stage: lint
+  tags:
+    - docker
   script:
     - echo "🔍 Linting code..."
     - npm ci
