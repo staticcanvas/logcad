@@ -1,5 +1,9 @@
 # Changelog
 
+## **logcad** v0.6.0
+
+- ADD: Type Inference for intelisence
+
 ## **logcad** v0.4.23
 
 - FIXED: ci build release and releast metadata stages
