@@ -183,11 +183,11 @@ deploy:npm:auto:
   needs:
     - job: build
       artifacts: true
-  id_tokens:
-    NPM_ID_TOKEN:
-      aud: "npm:registry.npmjs.org"
-    SIGSTORE_ID_TOKEN:
-      aud: sigstore
+  # id_tokens:
+  #   NPM_ID_TOKEN:
+  #     aud: "npm:registry.npmjs.org"
+  #   SIGSTORE_ID_TOKEN:
+  #     aud: sigstore
   before_script:
     - cd dist/${CI_PROJECT_NAME}
       
