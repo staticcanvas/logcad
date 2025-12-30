@@ -61,6 +61,8 @@ lint:
 # ------------------------------------------------------
 build:
   stage: build
+  tags:
+    - docker
   before_script:
     - echo "🔵 Preparing build..."
     - apt-get update && apt-get install -y jq
@@ -86,11 +88,14 @@ build:
     - tags
   allow_failure: false
 
+
 # ------------------------------------------------------
 # Deploy to Generic Package Registry
 # ------------------------------------------------------
 deploy:generic:
   stage: deploy
+  tags:
+    - docker
   needs:
     - job: build
       artifacts: true
@@ -128,6 +133,8 @@ deploy:generic:
 # ------------------------------------------------------
 deploy:npm:manual:
   stage: deploy
+  tags:
+    - docker
   needs:
     - job: build
       artifacts: true
@@ -169,6 +176,8 @@ deploy:npm:manual:
 # ------------------------------------------------------
 deploy:npm:auto:
   stage: deploy
+  tags:
+    - docker
   needs:
     - job: build
       artifacts: true
@@ -212,6 +221,8 @@ deploy:npm:auto:
 # ------------------------------------------------------
 publish:jsr:auto:
   stage: deploy
+  tags:
+    - docker
   needs:
     - job: build
       artifacts: true
@@ -273,6 +284,8 @@ publish:jsr:auto:
 
 generate:generic:release:metadata:
   stage: release
+  tags:
+    - docker
   image: sgkens/phellams-automator:2.5.1
   needs:
     - job: deploy:generic
@@ -423,6 +436,8 @@ generate:generic:release:metadata:
 # ------------------------------------------------------
 release:gitlab:
   stage: release
+  tags:
+    - docker
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   needs:
     - job: deploy:generic
